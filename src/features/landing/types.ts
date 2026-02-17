@@ -12,6 +12,7 @@ export type ServiceTab = {
   desc: string;
   list: string[];
   bg: string;
+  content?: string;
 };
 
 export type LeadershipTab = {
@@ -20,6 +21,7 @@ export type LeadershipTab = {
   desc: string;
   list: string[];
   bg: string;
+  content?: string;
 };
 
 export type Job = {

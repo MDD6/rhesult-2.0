@@ -149,10 +149,8 @@ export function LandingPageClient() {
         <div className="absolute inset-0 heroBG" />
         <div className="relative z-10 mx-auto max-w-6xl px-5 pt-28 pb-16">
           <div className="relative">
-            <div className="orbit" />
             <div className="mx-auto max-w-4xl text-center">
               <p className="inline-flex items-center gap-2 pill px-4 py-2 text-xs text-slate-700">
-                <span className="h-2 w-2 rounded-full accent-dot" />
                 Gestão de Pessoas • Desenvolvimento • Performance
               </p>
               <h1 className="mt-6 text-4xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,.28)]">
