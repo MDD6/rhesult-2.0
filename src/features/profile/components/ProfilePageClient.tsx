@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useAuth } from '@/shared/context/AppContext';
 import { AppHeader } from '@/shared/components/AppHeader';
 
 interface User {
@@ -12,6 +13,7 @@ interface User {
 }
 
 export function ProfilePageClient() {
+  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User>({
     nome: '',
@@ -32,10 +34,16 @@ export function ProfilePageClient() {
   const carregarPerfil = useCallback(async () => {
     try {
       setMessage('');
-      // Simular chamada à API - ajuste conforme seu backend
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      
+      // Add authorization token if available
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/auth/me', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
       });
 
       if (!response.ok) throw new Error('Erro ao carregar perfil');
@@ -58,7 +66,7 @@ export function ProfilePageClient() {
       setMessage('Não foi possível carregar seu perfil.');
       setMessageType('erro');
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     carregarPerfil();
@@ -93,9 +101,14 @@ export function ProfilePageClient() {
 
       if (senha) payload.senha = senha;
 
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/auth/me', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -146,9 +159,14 @@ export function ProfilePageClient() {
           if (!base64) return;
 
           try {
+            const headers: HeadersInit = { 'Content-Type': 'application/json' };
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const response = await fetch('/api/auth/me', {
               method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
+              headers,
               body: JSON.stringify({ avatar_url: `data:image/png;base64,${base64}` }),
             });
 
