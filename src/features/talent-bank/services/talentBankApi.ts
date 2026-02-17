@@ -36,6 +36,8 @@ export type CreateCandidatoInput = {
   curriculum_url?: string;
 };
 
+export type UpdateCandidatoInput = Partial<CreateCandidatoInput>;
+
 function getApiBase() {
   if (typeof window !== "undefined") {
     const globalAuth = (window as Window & { RhesultAuth?: { apiBase?: () => string } }).RhesultAuth;
@@ -105,29 +107,35 @@ export async function fetchVagas(): Promise<Vaga[]> {
   const apiBase = getApiBase();
   const url = apiBase ? `${apiBase}/api/vagas` : "/api/vagas";
 
-  const response = await fetch(url, {
-    cache: "no-store",
-    headers: buildHeaders(),
-  });
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: buildHeaders(),
+    });
 
-  if (!response.ok) {
+    if (!response.ok) {
+      console.warn(`[fetchVagas] Server responded with status ${response.status}`);
+      return [];
+    }
+
+    const data = (await response.json()) as unknown;
+    const list = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown[] })?.data || [];
+
+    return list
+      .map((item) => item as Record<string, unknown>)
+      .filter((item) => item.id && item.titulo)
+      .map((item) => ({ id: item.id as string | number, titulo: String(item.titulo) }));
+  } catch (error) {
+    console.error("[fetchVagas] Failed to fetch vagas:", error);
     return [];
   }
-
-  const data = (await response.json()) as unknown;
-  const list = Array.isArray(data)
-    ? data
-    : (data as { data?: unknown[] })?.data || [];
-
-  return list
-    .map((item) => item as Record<string, unknown>)
-    .filter((item) => item.id && item.titulo)
-    .map((item) => ({ id: item.id as string | number, titulo: String(item.titulo) }));
 }
 
 export async function patchCandidatoEtapa(id: string | number, etapa: string) {
   const apiBase = getApiBase();
-  const url = apiBase ? `${apiBase}/candidatos/${id}` : `/candidatos/${id}`;
+  const url = apiBase ? `${apiBase}/api/candidatos/${id}` : `/api/candidatos/${id}`;
 
   const response = await fetch(url, {
     method: "PATCH",
@@ -163,4 +171,43 @@ export async function createCandidato(input: CreateCandidatoInput): Promise<Cand
   const data = (await response.json()) as unknown;
   const payload = (data as { data?: unknown })?.data ?? data;
   return normalizeCandidate(payload as Record<string, unknown>);
+}
+
+export async function updateCandidato(
+  id: string | number,
+  input: UpdateCandidatoInput
+): Promise<Candidato> {
+  const apiBase = getApiBase();
+  const url = apiBase ? `${apiBase}/api/candidatos/${id}` : `/api/candidatos/${id}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildHeaders(),
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao atualizar candidato.");
+  }
+
+  const data = (await response.json()) as unknown;
+  const payload = (data as { data?: unknown })?.data ?? data;
+  return normalizeCandidate(payload as Record<string, unknown>);
+}
+
+export async function deleteCandidato(id: string | number): Promise<void> {
+  const apiBase = getApiBase();
+  const url = apiBase ? `${apiBase}/api/candidatos/${id}` : `/api/candidatos/${id}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: buildHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao excluir candidato.");
+  }
 }

@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const endpoints = ["/auth/login", "/login", "/api/login"];
+  const endpoints = ["/auth/login", "/api/auth/login", "/login", "/api/login"];
   const errors: string[] = [];
 
   for (const endpoint of endpoints) {
@@ -96,6 +96,15 @@ export async function POST(request: Request) {
         }
 
         return nextResponse;
+      }
+
+      if (response.status !== 404) {
+        return NextResponse.json(
+          typeof data === "object" && data
+            ? (data as Record<string, unknown>)
+            : { error: typeof data === "string" ? data : "Falha no login." },
+          { status: response.status },
+        );
       }
 
       const message =

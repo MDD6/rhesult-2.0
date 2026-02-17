@@ -21,9 +21,11 @@ export function useJobsPolling(intervalMs = 15000) {
   const fetchJobs = useCallback(async () => {
     try {
       const data = await fetchJobsRequest();
-      setJobs(data);
+      setJobs(data || []);
       setError(null);
-    } catch {
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
+      console.warn("[useJobsPolling] Erro ao buscar vagas:", errorMsg);
       setError("Sistema de vagas indisponível no momento.");
     } finally {
       setLoading(false);

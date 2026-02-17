@@ -20,12 +20,6 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("rhesult_token")?.value;
 
   if (isStaticPath(pathname) || isPublicPath(pathname)) {
-    if (pathname === "/login" && token) {
-      const nextParam = request.nextUrl.searchParams.get("next");
-      const target = nextParam && nextParam.startsWith("/") ? nextParam : "/";
-      return NextResponse.redirect(new URL(target, request.url));
-    }
-
     return NextResponse.next();
   }
 

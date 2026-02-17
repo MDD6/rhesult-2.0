@@ -33,7 +33,7 @@ export interface VagaPaginationState {
   vagasPorPagina: number;
 }
 
-export type VagaView = "dashboard" | "lista" | "cards" | "kanban";
+export type VagaView = "dashboard" | "lista" | "cards";
 
 export const STATUS_ORDER = [
   "Recebendo Currículos",

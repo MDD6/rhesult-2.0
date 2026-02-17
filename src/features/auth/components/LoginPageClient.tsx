@@ -3,9 +3,8 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { loginRequest } from "../services/authApi";
-import { getSessionToken, saveSession } from "../services/session";
 
 export function LoginPageClient() {
   const router = useRouter();
@@ -15,13 +14,6 @@ export function LoginPageClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (getSessionToken()) {
-      const nextPath = searchParams.get("next") || "/";
-      router.replace(nextPath);
-    }
-  }, [router, searchParams]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -40,9 +32,20 @@ export function LoginPageClient() {
         throw new Error("Resposta de login sem token. Verifique o endpoint do backend.");
       }
 
-      saveSession(response);
-      const nextPath = searchParams.get("next") || "/";
-      router.replace(nextPath);
+      // Salvar em localStorage (para compatibilidade)
+      if (typeof window !== "undefined") {
+        localStorage.setItem("rhesult_token", token);
+        if (response.user) {
+          localStorage.setItem("rhesult_user", JSON.stringify(response.user));
+        }
+      }
+
+      // Aguardar um pouco para o cookie httpOnly ser processado pelo navegador
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Redirecionar para a página solicitada ou vagas
+      const nextPath = searchParams.get("next") || "/vagas";
+      router.push(nextPath);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao realizar login.";
       setError(message);

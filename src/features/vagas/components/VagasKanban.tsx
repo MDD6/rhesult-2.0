@@ -21,7 +21,7 @@ export function VagasKanban({ vagas, onDetalhes }: VagasKanbanProps) {
           const vagasStatus = vagas.filter(v => v.status_processo === status);
 
           return (
-            <div key={status} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex flex-col min-h-[220px] w-[260px] flex-shrink-0 snap-start">
+            <div key={status} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex flex-col min-h-[220px] w-[260px] shrink-0 snap-start">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${meta.dot}`}></span>

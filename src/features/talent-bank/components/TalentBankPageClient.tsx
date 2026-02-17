@@ -1,17 +1,18 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   type Candidato,
   type CreateCandidatoInput,
   type Vaga,
   createCandidato,
+  deleteCandidato,
   fetchCandidatos,
   fetchVagas,
   patchCandidatoEtapa,
+  updateCandidato,
 } from "../services/talentBankApi";
+import { AppHeader } from "@/shared/components/AppHeader";
 
 type ViewMode = "dashboard" | "lista" | "cards";
 type ExportScope = "filtered" | "page" | "selected";
@@ -90,6 +91,30 @@ function normalize(value: string | undefined | null) {
     .toLowerCase();
 }
 
+function isValidEmail(value?: string) {
+  const email = String(value || "").trim();
+  if (!email) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function onlyDigits(value?: string) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function isValidPhone(value?: string) {
+  const digits = onlyDigits(value);
+  if (!digits) return true;
+  return digits.length >= 8;
+}
+
+function formatPhone(value?: string) {
+  const digits = onlyDigits(value).slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 function badgeClass(etapa?: string) {
   const key = normalize(etapa);
   if (key.includes("contratado")) return "badge-etapa contratado";
@@ -133,6 +158,7 @@ function downloadFile(content: string, type: string, filename: string) {
 export function TalentBankPageClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [vagasError, setVagasError] = useState("");
   const [view, setView] = useState<ViewMode>("dashboard");
 
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
@@ -171,16 +197,51 @@ export function TalentBankPageClient() {
   ]);
   const [createForm, setCreateForm] = useState<CreateCandidatoInput>(createInitialCandidatoForm());
   const [creatingCandidate, setCreatingCandidate] = useState(false);
+  const [editForm, setEditForm] = useState<CreateCandidatoInput>(createInitialCandidatoForm());
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingCandidate, setDeletingCandidate] = useState(false);
+
+  const editEmailInvalid = useMemo(() => !isValidEmail(editForm.email), [editForm.email]);
+  const editPhoneInvalid = useMemo(() => !isValidPhone(editForm.telefone), [editForm.telefone]);
+
+  const openDetalhe = (candidate: Candidato) => {
+    setDetalhe(candidate);
+    setModalEtapa(candidate.etapa || "Inscricao");
+    setEditForm({
+      nome: candidate.nome || "",
+      email: candidate.email || "",
+      telefone: candidate.telefone || "",
+      cidade: candidate.cidade || "",
+      senioridade: candidate.senioridade || "",
+      cargo_desejado: candidate.cargo_desejado || "",
+      etapa: candidate.etapa || "Inscricao",
+      vaga_id: candidate.vaga_id ?? null,
+      origem: candidate.origem || "Banco de Talentos",
+      historico: candidate.historico || "",
+      linkedin: candidate.linkedin || "",
+      curriculum_url: candidate.curriculum_url || "",
+    });
+  };
 
   const load = async () => {
     setLoading(true);
     setError("");
+    setVagasError("");
     try {
       const [cand, vg] = await Promise.all([fetchCandidatos(), fetchVagas()]);
       setCandidatos(cand);
       setVagas(vg);
-    } catch {
-      setError("Erro ao conectar com o servidor. Verifique sua conexão.");
+      
+      if (vg.length === 0) {
+        setVagasError("⚠️ Sistema de vagas indisponível no momento. Você ainda pode cadastrar candidatos no banco de talentos.");
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
+      if (errorMsg.includes("vagas")) {
+        setVagasError("⚠️ Sistema de vagas indisponível no momento. Você ainda pode cadastrar candidatos no banco de talentos.");
+      } else {
+        setError("Erro ao conectar com o servidor. Verifique sua conexão.");
+      }
     } finally {
       setLoading(false);
     }
@@ -297,6 +358,63 @@ export function TalentBankPageClient() {
     }
   };
 
+  const saveModalPerfil = async () => {
+    if (!detalhe || !editForm.nome?.trim()) {
+      setError("Informe o nome do candidato.");
+      return;
+    }
+
+    if (editEmailInvalid) {
+      setError("E-mail inválido.");
+      return;
+    }
+
+    if (editPhoneInvalid) {
+      setError("Telefone inválido.");
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      await updateCandidato(detalhe.id, {
+        nome: editForm.nome.trim(),
+        email: editForm.email?.trim() || undefined,
+        telefone: editForm.telefone?.trim() || undefined,
+        cidade: editForm.cidade?.trim() || undefined,
+        senioridade: editForm.senioridade?.trim() || undefined,
+        cargo_desejado: editForm.cargo_desejado?.trim() || undefined,
+        vaga_id: editForm.vaga_id || null,
+        etapa: modalEtapa || editForm.etapa,
+        origem: editForm.origem?.trim() || undefined,
+        historico: editForm.historico?.trim() || undefined,
+        linkedin: editForm.linkedin?.trim() || undefined,
+        curriculum_url: editForm.curriculum_url?.trim() || undefined,
+      });
+      setDetalhe(null);
+      await load();
+    } catch {
+      setError("Não foi possível atualizar os dados do candidato.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const removeCandidate = async () => {
+    if (!detalhe) return;
+    if (!confirm("Tem certeza que deseja excluir este candidato?")) return;
+
+    setDeletingCandidate(true);
+    try {
+      await deleteCandidato(detalhe.id);
+      setDetalhe(null);
+      await load();
+    } catch {
+      setError("Não foi possível excluir o candidato.");
+    } finally {
+      setDeletingCandidate(false);
+    }
+  };
+
   const clearFiltros = () => {
     setFiltroTexto("");
     setFiltroCidade("");
@@ -397,21 +515,18 @@ export function TalentBankPageClient() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bt-page">
-      <header className="bg-white/90 border-b border-slate-200 backdrop-blur-sm">
-        <div className="w-full px-4 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <img loading="lazy" src="/Rhesult.png" alt="Logo Rhesult" className="h-10 w-auto max-w-55 object-contain" />
-            <span className="hidden sm:inline-flex text-xs font-extrabold text-slate-500 border-l border-slate-200 pl-3">Talentos</span>
-          </div>
+    <main className="min-h-screen flex flex-col page-shell">
+      <AppHeader />
 
-          <nav className="hidden md:flex items-center gap-4 text-sm font-extrabold">
-            <Link href="/" className="text-(--ink) hover:text-(--brand)">Dashboard</Link>
-            <span className="text-(--brand)">Talentos</span>
-            <Link href="/assets" className="text-(--ink) hover:text-(--brand)">Assets</Link>
-          </nav>
+      <main className="flex-1 w-full p-4 sm:p-6 lg:p-8">
+        <div className="max-w-400 mx-auto">
+          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0A2725]">Banco de Talentos</h1>
+              <p className="text-sm text-slate-500 mt-1">Gerencie, filtre e acompanhe todos os candidatos.</p>
+            </div>
 
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => setShowQuickActions((prev) => !prev)}
@@ -433,8 +548,7 @@ export function TalentBankPageClient() {
               >
                 Novo candidato
               </button>
-            <button type="button" onClick={() => void load()} className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50">Atualizar</button>
-            <Link href="/" className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50">Voltar</Link>
+              <button type="button" onClick={() => void load()} className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50">Atualizar</button>
 
               {showQuickActions && (
                 <div className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-slate-200 bg-white shadow-lg p-2">
@@ -446,16 +560,6 @@ export function TalentBankPageClient() {
                   <button type="button" onClick={() => { setShowCreateModal(true); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Novo candidato</button>
                 </div>
               )}
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 w-full p-4 sm:p-6 lg:p-8">
-        <div className="max-w-400 mx-auto">
-          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#0A2725]">Banco de Talentos</h1>
-              <p className="text-sm text-slate-500 mt-1">Gerencie, filtre e acompanhe todos os candidatos.</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -522,7 +626,19 @@ export function TalentBankPageClient() {
             </div>
           </section>
 
-          {error && <div className="mb-6 p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm">{error}</div>}
+          {error && (
+            <div className="mb-6 p-3 rounded-xl border border-amber-200 bg-amber-50/80 text-amber-900 text-sm font-semibold flex items-center justify-between gap-3">
+              <span>{error}</span>
+              <button type="button" onClick={() => setError("")} className="text-amber-900/70 hover:text-amber-900 text-xs font-black">FECHAR</button>
+            </div>
+          )}
+
+          {vagasError && (
+            <div className="mb-6 p-3 rounded-xl border border-orange-200 bg-orange-50/80 text-orange-900 text-sm font-semibold flex items-center justify-between gap-3">
+              <span>{vagasError}</span>
+              <button type="button" onClick={() => setVagasError("")} className="text-orange-900/70 hover:text-orange-900 text-xs font-black">FECHAR</button>
+            </div>
+          )}
 
           {view === "dashboard" && (
             <section className="space-y-6">
@@ -587,7 +703,12 @@ export function TalentBankPageClient() {
                   </thead>
                   <tbody>
                     {loading && (
-                      <tr><td colSpan={8} className="py-8 text-center text-slate-500">Carregando...</td></tr>
+                      <tr>
+                        <td colSpan={8} className="py-10 text-center text-slate-500">
+                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--brand)] border-t-transparent"></div>
+                          <p className="mt-2 text-xs font-semibold">Carregando candidatos...</p>
+                        </td>
+                      </tr>
                     )}
                     {!loading && paginaSlice.length === 0 && (
                       <tr><td colSpan={8} className="py-8 text-center text-slate-500">Nenhum candidato encontrado.</td></tr>
@@ -598,7 +719,7 @@ export function TalentBankPageClient() {
                           <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => toggleSelect(c.id)} className="w-4 h-4" />
                         </td>
                         <td>
-                          <button type="button" onClick={() => { setDetalhe(c); setModalEtapa(c.etapa || "Inscricao"); }} className="font-extrabold text-slate-900 hover:text-(--brand)">{c.nome || "-"}</button>
+                          <button type="button" onClick={() => openDetalhe(c)} className="font-extrabold text-slate-900 hover:text-(--brand)">{c.nome || "-"}</button>
                           <div className="text-[11px] text-slate-500">{c.email || ""}</div>
                         </td>
                         <td>{c.cargo_desejado || "-"}</td>
@@ -607,7 +728,7 @@ export function TalentBankPageClient() {
                         <td><span className={badgeClass(c.etapa)}>{c.etapa || "-"}</span></td>
                         <td>{c.criado_em ? new Date(c.criado_em).toLocaleDateString("pt-BR") : "-"}</td>
                         <td className="text-right">
-                          <button type="button" onClick={() => { setDetalhe(c); setModalEtapa(c.etapa || "Inscricao"); }} className="text-xs px-3 py-1.5 rounded-full border border-slate-200 hover:bg-white font-extrabold">Detalhes</button>
+                          <button type="button" onClick={() => openDetalhe(c)} className="text-xs px-3 py-1.5 rounded-full border border-slate-200 hover:bg-white font-extrabold">Detalhes</button>
                         </td>
                       </tr>
                     ))}
@@ -652,13 +773,13 @@ export function TalentBankPageClient() {
 
                     <div className="flex items-center gap-2">
                       <span className={badgeClass(c.etapa)}>{c.etapa || "Inscricao"}</span>
-                      <button onClick={() => { setDetalhe(c); setModalEtapa(c.etapa || "Inscricao"); }} className="ml-auto px-3 py-2 rounded-lg bg-slate-50 text-slate-700 text-xs font-semibold hover:bg-slate-100 border border-slate-200">Ver perfil</button>
+                      <button onClick={() => openDetalhe(c)} className="ml-auto px-3 py-2 rounded-lg bg-slate-50 text-slate-700 text-xs font-semibold hover:bg-slate-100 border border-slate-200">Ver perfil</button>
                     </div>
                   </article>
                 ))}
 
                 {!loading && paginaSlice.length === 0 && (
-                  <div className="col-span-full text-center py-16">
+                  <div className="col-span-full glass rounded-2xl text-center py-16">
                     <h3 className="text-lg font-bold text-[#0A2725]">Nenhum candidato encontrado</h3>
                     <p className="text-sm text-slate-500">Tente ajustar os filtros.</p>
                   </div>
@@ -684,26 +805,36 @@ export function TalentBankPageClient() {
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl font-black text-(--ink)">{detalhe.nome || "Sem nome"}</h2>
-                <p className="text-sm text-(--brand) font-black mt-1">{detalhe.cargo_desejado || "Cargo não informado"}</p>
+                <p className="text-sm text-(--brand) font-black mt-1">Edição rápida de perfil</p>
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="glass p-3">
                     <p className="text-xs font-black text-slate-500 uppercase">Contato</p>
-                    <p className="mt-2 font-extrabold text-slate-800">{detalhe.email || "-"}</p>
-                    <p className="font-extrabold text-slate-800">{detalhe.telefone || "-"}</p>
-                    <p className="text-slate-500">{detalhe.cidade || "-"}</p>
+                    <input value={editForm.email || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, email: e.target.value }))} placeholder="E-mail" className={`mt-2 w-full px-2 py-1.5 rounded-lg border text-xs ${editEmailInvalid ? "border-red-300 bg-red-50/40" : "border-slate-200"}`} />
+                    {editEmailInvalid && <p className="mt-1 text-[11px] text-red-600 font-semibold">Formato de e-mail inválido.</p>}
+                    <input value={editForm.telefone || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, telefone: formatPhone(e.target.value) }))} placeholder="Telefone" className={`mt-2 w-full px-2 py-1.5 rounded-lg border text-xs ${editPhoneInvalid ? "border-red-300 bg-red-50/40" : "border-slate-200"}`} />
+                    {editPhoneInvalid && <p className="mt-1 text-[11px] text-red-600 font-semibold">Informe pelo menos 8 dígitos.</p>}
+                    <input value={editForm.cidade || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, cidade: e.target.value }))} placeholder="Cidade" className="mt-2 w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs" />
                   </div>
                   <div className="glass p-3">
                     <p className="text-xs font-black text-slate-500 uppercase">Resumo</p>
-                    <p className="mt-2"><strong>Vaga:</strong> {detalhe.vaga_titulo || "-"}</p>
-                    <p><strong>Senioridade:</strong> {detalhe.senioridade || "-"}</p>
+                    <input value={editForm.nome || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, nome: e.target.value }))} placeholder="Nome" className="mt-2 w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs" />
+                    <input value={editForm.cargo_desejado || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, cargo_desejado: e.target.value }))} placeholder="Cargo desejado" className="mt-2 w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs" />
+                    <select value={editForm.senioridade || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, senioridade: e.target.value }))} className="mt-2 w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white">
+                      <option value="">Senioridade</option>
+                      {SENIORIDADES.map((item) => <option key={item}>{item}</option>)}
+                    </select>
+                    <select value={editForm.vaga_id == null ? "" : String(editForm.vaga_id)} onChange={(e) => setEditForm((prev) => ({ ...prev, vaga_id: e.target.value || null }))} className="mt-2 w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white">
+                      <option value="">Banco de talentos</option>
+                      {vagas.map((vaga) => <option key={String(vaga.id)} value={String(vaga.id)}>{vaga.titulo}</option>)}
+                    </select>
                     <p><strong>Criado em:</strong> {detalhe.criado_em ? new Date(detalhe.criado_em).toLocaleString("pt-BR") : "-"}</p>
                   </div>
                 </div>
 
                 <div className="mt-4">
                   <p className="text-sm font-black text-(--ink) mb-2">Histórico</p>
-                  <div className="glass p-3 text-sm text-slate-700 whitespace-pre-line">{detalhe.historico || "Nenhum histórico informado."}</div>
+                  <textarea value={editForm.historico || ""} onChange={(e) => setEditForm((prev) => ({ ...prev, historico: e.target.value }))} className="glass p-3 text-sm text-slate-700 whitespace-pre-line w-full min-h-24" />
                 </div>
               </div>
 
@@ -714,6 +845,8 @@ export function TalentBankPageClient() {
                     {ETAPAS.map((e) => <option key={e}>{e}</option>)}
                   </select>
                   <button type="button" onClick={() => void saveModalEtapa()} className="mt-2 w-full px-3 py-2 rounded-lg bg-(--ink) text-white text-xs font-black">Salvar etapa</button>
+                  <button type="button" disabled={savingEdit || editEmailInvalid || editPhoneInvalid || !editForm.nome?.trim()} onClick={() => void saveModalPerfil()} className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-black hover:bg-slate-50 disabled:opacity-60">{savingEdit ? "Salvando..." : "Salvar perfil"}</button>
+                  <button type="button" disabled={deletingCandidate} onClick={() => void removeCandidate()} className="mt-2 w-full px-3 py-2 rounded-lg bg-red-600 text-white text-xs font-black hover:bg-red-700 disabled:opacity-60">{deletingCandidate ? "Excluindo..." : "Excluir candidato"}</button>
                 </div>
 
                 <div className="glass p-4">
