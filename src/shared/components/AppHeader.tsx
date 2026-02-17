@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "./AppContext";
 
 type NavItem = {
   label: string;
@@ -32,6 +33,8 @@ function isActive(pathname: string, href: string) {
 
 export function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -39,7 +42,14 @@ export function AppHeader() {
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileNavRef = useRef<HTMLElement | null>(null);
 
-  const userName = useMemo(() => "Usuário", []);
+  const userName = useMemo(() => user?.nome || "Usuário", [user?.nome]);
+  const userEmail = useMemo(() => user?.email || "usuario@rhesult.com", [user?.email]);
+  const userRole = useMemo(() => {
+    if (!user?.role) return "Usuário";
+    const roleMap = { admin: "Administrador", rh: "RH", recruiter: "Recrutador", candidate: "Candidato" };
+    return roleMap[user.role as keyof typeof roleMap] || user.role;
+  }, [user?.role]);
+  const avatarLetter = useMemo(() => user?.nome?.charAt(0).toUpperCase() || "U", [user?.nome]);
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
@@ -219,16 +229,12 @@ export function AppHeader() {
               aria-haspopup="true"
               aria-expanded={showUserMenu}
             >
-              <Image
-                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><circle cx='64' cy='64' r='64' fill='%23F58634'/><circle cx='64' cy='48' r='20' fill='%23fff'/><path d='M 32 100 Q 32 76 64 76 Q 96 76 96 100' fill='%23fff'/></svg>"
-                alt="Usuário"
-                width={32}
-                height={32}
-                className="rounded-full w-8 h-8 border-2 border-[var(--brand)]/60 shadow-sm object-cover"
-              />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-sm border-2 border-[var(--brand)]/60 shadow-sm">
+                {avatarLetter}
+              </div>
               <div className="hidden sm:flex flex-col items-start">
                 <span className="text-slate-900 text-sm font-bold leading-tight max-w-[100px] truncate">{userName}</span>
-                <span className="text-slate-500 text-xs font-medium leading-tight">Usuário</span>
+                <span className="text-slate-500 text-xs font-medium leading-tight">{userRole}</span>
               </div>
               <svg width="16" height="16" fill="none" stroke="var(--ink)" strokeWidth="2" viewBox="0 0 24 24" className="hidden sm:block text-slate-600">
                 <path d="M6 9l6 6 6-6" />
@@ -238,10 +244,16 @@ export function AppHeader() {
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-72 z-40">
                 <div className="py-2 bg-white/95 border border-slate-200 rounded-xl shadow-xl backdrop-blur-xl">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-xs text-slate-500 font-semibold">CONECTADO COMO</p>
-                    <p className="text-sm text-slate-900 font-bold mt-1 truncate">{userName}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 truncate">usuario@rhesult.com</p>
+                  <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                      {avatarLetter}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-slate-500 font-semibold">CONECTADO COMO</p>
+                      <p className="text-sm text-slate-900 font-bold mt-1 truncate">{userName}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">{userEmail}</p>
+                      <p className="text-xs text-orange-600 font-semibold mt-1">{userRole}</p>
+                    </div>
                   </div>
                   <Link href="/perfil" className="px-4 py-3 text-slate-700 hover:bg-slate-50 flex items-center gap-3 text-sm font-semibold transition-colors">
                     <span className="text-lg">👤</span> 
@@ -265,9 +277,17 @@ export function AppHeader() {
                     </div>
                   </Link>
                   <div className="border-t border-slate-100 my-1"></div>
-                  <Link href="/login" className="px-4 py-3 text-red-600 hover:bg-red-50 flex items-center gap-3 text-sm font-semibold transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setShowUserMenu(false);
+                      router.push("/login");
+                    }}
+                    className="w-full px-4 py-3 text-red-600 hover:bg-red-50 flex items-center gap-3 text-sm font-semibold transition-colors text-left"
+                  >
                     <span className="text-lg">🚪</span> Sair da conta
-                  </Link>
+                  </button>
                 </div>
               </div>
             )}
