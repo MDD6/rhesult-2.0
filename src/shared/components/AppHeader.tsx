@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "./AppContext";
+import { useAuth } from "../context/AppContext";
 
 type NavItem = {
   label: string;
