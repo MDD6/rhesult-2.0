@@ -2,10 +2,13 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LEADERSHIP_TABS, LOGOS, SERVICE_TABS, TEAM_MEMBERS } from "../data";
 import { getTimeAgo, isNewJob, useJobsPolling } from "../hooks/useJobsPolling";
 import { useTabs } from "../hooks/useTabs";
 import { submitApplicationRequest } from "../services/jobsApi";
+import { useAuth } from "@/shared";
 import type { Job, JobApplication } from "../types";
 
 type ApplyFormState = Omit<JobApplication, "vaga_id">;
@@ -26,6 +29,7 @@ const INITIAL_FORM: ApplyFormState = {
 
 export function LandingPageClient() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showAllJobs, setShowAllJobs] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +37,8 @@ export function LandingPageClient() {
   const [curriculumFile, setCurriculumFile] = useState<File | null>(null);
   const [feedback, setFeedback] = useState<string>("");
 
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
   const serviceTabs = useTabs(SERVICE_TABS);
   const leadershipTabs = useTabs(LEADERSHIP_TABS);
   const { jobs, loading, error } = useJobsPolling();
@@ -107,7 +113,55 @@ export function LandingPageClient() {
             </nav>
 
             <div className="flex items-center gap-2">
-              <a href="/login" className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all">Entrar</a>
+              {isAuthenticated && user ? (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full hover:bg-slate-50 transition-all group"
+                  >
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-xs font-semibold text-slate-900">{user.nome?.split(" ")[0]}</span>
+                      <span className="text-[10px] font-medium text-slate-500">{user.role || "Usuário"}</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:shadow-md transition-all">
+                      {user.nome?.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 z-50">
+                      <div className="p-3 border-b border-slate-100 flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                          {user.nome?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-slate-900">{user.nome}</p>
+                          <p className="text-xs text-slate-500">{user.email}</p>
+                        </div>
+                      </div>
+                      <nav className="p-2">
+                        <Link href="/profile" className="block px-3 py-2 text-sm hover:bg-slate-50 rounded-lg transition-colors">
+                          Meu Perfil
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            logout();
+                            setUserMenuOpen(false);
+                            router.push("/login");
+                          }}
+                          className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          Sair
+                        </button>
+                      </nav>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <a href="/login" className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all">Entrar</a>
+              )}
               <button
                 type="button"
                 className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-700 border border-slate-200"
