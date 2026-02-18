@@ -343,299 +343,284 @@ export function ProfilePageClient() {
   }
 
   return (
-    <>
+    <main className="bg-slate-50 min-h-screen pb-12">
       <AppHeader />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6 items-start">
-          {/* PERFIL */}
-          <section className="premium-card p-6 md:p-8 bg-white border border-slate-200/50">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <span className="pill px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-full">
-                  Perfil
-                </span>
-                <h1 className="mt-3 text-2xl md:text-3xl font-semibold leading-tight">
-                  Seus dados, funções e segurança
-                  <span className="block text-[#F58634]">em um lugar seguro</span>
-                </h1>
-                <p className="mt-2 text-sm text-slate-600">
-                  Atualize suas informações e mantenha o acesso seguro.
-                </p>
-              </div>
-
-              <div className="hidden md:flex flex-col items-end gap-2">
-                <span className="pill px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-full">
-                  ID: <span className="font-black text-slate-900">USR-001</span>
-                </span>
-                <span className="pill px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
-                  Status: Ativo
-                </span>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-              {/* Avatar */}
-              <div className="bg-slate-50/80 border border-slate-200/50 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="relative">
-                  <img
-                    src={avatar}
-                    alt="Avatar"
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-slate-200"
-                  />
-                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white"></span>
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Meu Perfil</h1>
+            <p className="text-slate-500 font-medium">Gerencie suas informações pessoais e credenciais de acesso.</p>
+          </div>
+          
+          <div className="flex gap-3">
+             <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div className={`w-2.5 h-2.5 rounded-full ${user.cargo ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                <div className="text-xs">
+                   <p className="font-bold text-slate-900">{user.cargo || 'Não definido'}</p>
+                   <p className="text-slate-500 font-medium">Sua Função</p>
                 </div>
+             </div>
+          </div>
+        </div>
 
-                <div className="flex-1">
-                  <p className="text-sm font-extrabold text-slate-900">Foto do perfil</p>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Selecione uma imagem para fazer upload, recorte e ajustar automaticamente.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Form */}
+          <section className="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+             <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                <h2 className="text-lg font-bold text-slate-900">Informações Pessoais</h2>
+                <p className="text-sm text-slate-500">Atualize sua foto e dados de contato.</p>
+             </div>
+             
+             <div className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Avatar Section */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
+                  <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                    <img
+                      src={avatar}
+                      alt="Avatar"
+                      className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md group-hover:opacity-90 transition-opacity"
+                    />
+                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white"></span>
+                  </div>
+
+                  <div className="flex-1 text-center sm:text-left space-y-2">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">Foto de Perfil</h3>
+                      <p className="text-xs text-slate-500">Recomendado: JPG ou PNG, min. 200x200px.</p>
+                    </div>
                     <button
                       type="button"
                       onClick={handleAvatarClick}
-                      className="px-4 py-2 rounded-lg bg-[#F58634] text-white text-sm font-bold hover:bg-orange-600 transition"
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
                     >
-                      📸 Alterar foto
+                      Alterar Foto
                     </button>
-                  </div>
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </div>
-
-              {/* Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <label htmlFor="nome" className="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
-                    Nome
-                  </label>
-                  <input
-                    id="nome"
-                    type="text"
-                    value={user.nome}
-                    onChange={(e) => setUser({ ...user, nome: e.target.value })}
-                    placeholder="Seu nome completo"
-                    autoComplete="name"
-                    className="mt-1 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/90 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#F58634]"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="email" className="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
-                    E-mail
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={user.email}
-                    onChange={(e) => setUser({ ...user, email: e.target.value })}
-                    placeholder="seuemail@empresa.com"
-                    autoComplete="email"
-                    className="mt-1 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/90 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#F58634]"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="cargo" className="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
-                    Função no sistema
-                  </label>
-                  <select
-                    id="cargo"
-                    value={user.cargo}
-                    onChange={(e) => setUser({ ...user, cargo: e.target.value })}
-                    className="mt-1 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/90 text-sm text-slate-900 focus:outline-none focus:border-[#F58634]"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="ADMIN">Administrador</option>
-                    <option value="RH">RH</option>
-                    <option value="GESTOR">Gestor</option>
-                    <option value="COLABORADOR">Colaborador</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
-                    Preferências
-                  </label>
-                  <button
-                    type="button"
-                    className="mt-1 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 text-sm font-extrabold text-slate-900 hover:bg-white focus:outline-none focus:border-[#F58634] flex items-center justify-between"
-                  >
-                    Abrir configurações
-                    <span className="text-slate-400">⚙️</span>
-                  </button>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="senha" className="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
-                    Nova senha (opcional)
-                  </label>
-                  <div className="mt-1 relative">
                     <input
-                      id="senha"
-                      type={showPassword ? 'text' : 'password'}
-                      value={senha}
-                      onChange={(e) => setSenha(e.target.value)}
-                      placeholder="Deixe em branco para manter a atual"
-                      autoComplete="new-password"
-                      className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 bg-white/90 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#F58634]"
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-extrabold text-slate-700 hover:bg-slate-50"
-                    >
-                      {showPassword ? '🙈' : '👁️'}
-                    </button>
                   </div>
-                  <p className="mt-2 text-xs text-slate-600">
-                    Dica: use pelo menos 10 caracteres, com letras e números.
-                  </p>
                 </div>
-              </div>
 
-              {message && (
-                <p
-                  className={`mt-4 text-sm text-center font-bold ${
-                    messageType === 'ok'
-                      ? 'text-emerald-600'
-                      : messageType === 'erro'
-                      ? 'text-red-600'
-                      : messageType === 'aviso'
-                      ? 'text-amber-600'
-                      : 'text-slate-600'
-                  }`}
-                >
-                  {message}
-                </p>
-              )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="nome" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+                      Nome Completo
+                    </label>
+                    <input
+                      id="nome"
+                      type="text"
+                      value={user.nome}
+                      onChange={(e) => setUser({ ...user, nome: e.target.value })}
+                      placeholder="Seu nome"
+                      autoComplete="name"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300"
+                    />
+                  </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-3 rounded-xl bg-[#F58634] text-white font-bold hover:bg-orange-600 disabled:opacity-50 transition flex items-center justify-center gap-2"
-                >
-                  💾 {loading ? 'Salvando...' : 'Salvar alterações'}
-                </button>
+                  <div>
+                    <label htmlFor="email" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+                      E-mail Profissional
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={user.email}
+                      onChange={(e) => setUser({ ...user, email: e.target.value })}
+                      placeholder="email@empresa.com"
+                      autoComplete="email"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300"
+                    />
+                  </div>
 
-                <div className="sm:ml-auto text-xs text-slate-600">
-                  última sincronização: <span className="text-slate-900 font-extrabold">{lastSync || '—'}</span>
+                  <div>
+                    <label htmlFor="cargo" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+                      Função
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="cargo"
+                        value={user.cargo}
+                        onChange={(e) => setUser({ ...user, cargo: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 appearance-none cursor-pointer"
+                      >
+                        <option value="">Selecione sua função...</option>
+                        <option value="ADMIN">Administrador</option>
+                        <option value="RH">Analista de RH</option>
+                        <option value="GESTOR">Gestor de Área</option>
+                        <option value="COLABORADOR">Colaborador</option>
+                      </select>
+                      <div className="absolute right-4 top-3.5 text-slate-400 pointer-events-none">
+                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="senha" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+                      Alterar Senha <span className="text-slate-300 normal-case tracking-normal font-normal ml-1">(Opcional)</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="senha"
+                        type={showPassword ? 'text' : 'password'}
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        placeholder="Nova senha..."
+                        autoComplete="new-password"
+                        className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3 p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors"
+                      >
+                        {showPassword ? (
+                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                        ) : (
+                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </form>
+
+                {message && (
+                  <div className={`p-4 rounded-xl text-sm font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-1 ${
+                    messageType === 'ok' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 
+                    messageType === 'erro' ? 'bg-red-50 text-red-700 border border-red-100' :
+                    'bg-amber-50 text-amber-700 border border-amber-100'
+                  }`}>
+                    {message}
+                  </div>
+                )}
+
+                <div className="pt-4 flex items-center gap-4 border-t border-slate-100">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2"
+                  >
+                    {loading ? (
+                       <>
+                         <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                         Salvando...
+                       </>
+                    ) : (
+                       'Salvar Alterações'
+                    )}
+                  </button>
+                  {lastSync && (
+                    <span className="text-xs text-slate-400 font-medium ml-auto">
+                      Sincronizado em: {lastSync}
+                    </span>
+                  )}
+                </div>
+              </form>
+             </div>
           </section>
 
-          {/* SEGURANÇA */}
-          <aside className="bg-slate-50/80 border border-slate-200/50 rounded-2xl p-6 md:p-8">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <span className="pill px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-full">
-                  Segurança
-                </span>
-                <h2 className="mt-3 text-lg font-semibold">Controle e visibilidade</h2>
-                <p className="mt-1 text-sm text-slate-600">Camadas de proteção e recomendações.</p>
-              </div>
-              <span className="pill px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full border border-orange-200">
-                Shield
-              </span>
+          {/* Sidebar Info */}
+          <aside className="lg:col-span-4 space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900">Segurança & Acessos</h3>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+               </div>
+               <div className="p-5 grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center text-center">
+                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">MFA / 2FA</span>
+                     <span className="text-sm font-bold text-slate-300">Em breve</span>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center text-center">
+                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Status</span>
+                     <span className="text-sm font-bold text-emerald-600">Ativo</span>
+                  </div>
+               </div>
+               <div className="px-5 pb-5">
+                  <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                     <p className="text-xs font-bold text-blue-800 mb-2">Recomendações</p>
+                     <ul className="space-y-2">
+                        <li className="flex items-center gap-2 text-[11px] text-blue-700">
+                           <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           Use senhas com letras e números
+                        </li>
+                        <li className="flex items-center gap-2 text-[11px] text-blue-700">
+                           <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           Não compartilhe suas credenciais
+                        </li>
+                     </ul>
+                  </div>
+               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="premium-card p-4 bg-white border border-slate-200/50">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500 font-extrabold">2FA</p>
-                <p className="mt-1 text-sm font-extrabold text-slate-900">Em breve</p>
-              </div>
-
-              <div className="premium-card p-4 bg-white border border-slate-200/50">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500 font-extrabold">Sessões</p>
-                <p className="mt-1 text-sm font-extrabold text-slate-900">1 ativa</p>
-              </div>
-
-              <div className="premium-card p-4 bg-white border border-slate-200/50">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500 font-extrabold">Permissões</p>
-                <p className="mt-1 text-sm font-extrabold text-slate-900">Padrão</p>
-              </div>
-
-              <div className="premium-card p-4 bg-white border border-slate-200/50">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500 font-extrabold">Auditoria</p>
-                <p className="mt-1 text-sm font-extrabold text-slate-900">Ativa</p>
-              </div>
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg p-6 text-white text-center">
+               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+               </div>
+               <h3 className="text-lg font-bold mb-1">Precisa de Ajuda?</h3>
+               <p className="text-sm text-slate-300 font-medium mb-4">Entre em contato com o suporte de TI.</p>
+               <button className="px-4 py-2 bg-white text-slate-900 text-xs font-bold rounded-lg hover:bg-slate-100 transition-colors">
+                  Abrir Chamado
+               </button>
             </div>
-
-            <div className="mt-4 premium-card p-4 bg-white border border-slate-200/50">
-              <p className="text-sm font-extrabold text-slate-900">Sugestões</p>
-              <ul className="mt-2 text-sm text-slate-600 list-disc ml-5 space-y-1">
-                <li>Ative 2FA quando estiver disponível</li>
-                <li>Use uma senha forte e exclusiva</li>
-                <li>Revise permissões por vaga/equipe</li>
-              </ul>
-            </div>
-
-            <button
-              type="button"
-              className="btn focus-brand w-full mt-4 px-4 py-3 rounded-xl bg-slate-100 text-slate-900 font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
-            >
-              <span>🔐</span>
-              Gerenciar sessões
-            </button>
           </aside>
         </div>
-      </main>
+      </div>
 
       {/* Cropper Modal */}
       {showCropperModal && imageSrc && (
-        <div className="fixed inset-0 bg-black/70 z-50 overflow-y-auto p-4 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-600px max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-600px max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-slate-900">Recortar imagem</h3>
               <button
                 type="button"
                 onClick={() => setShowCropperModal(false)}
-                className="text-slate-500 hover:text-slate-700 text-2xl"
+                className="text-slate-500 hover:text-slate-700 text-2xl font-bold p-2 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 ×
               </button>
             </div>
 
-            <div className="mb-4 text-center">
+            <div className="mb-4 text-center bg-slate-50 rounded-xl p-4 border border-slate-100">
               <img
                 src={imageSrc}
                 alt="Preview"
                 style={{ maxHeight: '400px', maxWidth: '100%' }}
-                className="mx-auto"
+                className="mx-auto rounded-lg"
               />
             </div>
 
             <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setShowCropperModal(false)}
-                className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold"
+                className="px-4 py-2 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-50 transition-all"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleCropConfirm}
-                className="px-4 py-2 rounded-lg bg-[#F58634] text-white font-bold hover:bg-orange-600"
+                className="px-6 py-2 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 transition-all"
               >
-                Confirmar
+                Salvar Recorte
               </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </main>
   );
 }

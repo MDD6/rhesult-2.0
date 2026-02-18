@@ -327,77 +327,115 @@ export function AppHeader() {
       </div>
 
       {mobileOpen && (
-        <nav ref={mobileNavRef} id="mobileNav" className="md:hidden mt-3 w-full max-w-7xl mx-auto px-4 pb-4 rounded-3xl navPanel border border-white/60 text-sm space-y-3 pointer-events-auto">
-          <div className="pt-3 px-1">
-            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 flex items-center gap-3 shadow-sm">
-              <div
-                className={`w-10 h-10 rounded-full ${
-                  hasAvatar
-                    ? "bg-center bg-cover bg-no-repeat"
-                    : "bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold"
-                }`}
-                style={hasAvatar ? { backgroundImage: `url(${avatarUrl})` } : undefined}
-              >
-                {!hasAvatar && avatarLetter}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-slate-900 truncate">{userName}</p>
-                <p className="text-xs text-slate-500 truncate">{userRole}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 space-y-2">
-            <Link href="/" className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-[var(--brand)] to-orange-500 text-white font-bold flex items-center gap-2 transition-colors duration-200 shadow-sm hover:shadow-md">
-              Dashboard
-            </Link>
-            <Link href="/" className="w-full px-4 py-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold flex items-center gap-2 transition-colors duration-200">
-              Corporativo
-            </Link>
-          </div>
-
-          <details className="group">
-            <summary className="w-full px-4 py-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold flex items-center justify-between gap-2 cursor-pointer transition-colors duration-200 list-none">
-              Recrutamento
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="group-open:rotate-180 transition-transform">
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </summary>
-            <div className="mt-2 pl-4 space-y-2 border-l-2 border-slate-200">
-              {recruitingNav.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`block px-3 py-2 rounded-lg text-xs font-medium ${
-                    isActive(pathname, item.href) ? "bg-[var(--brand)]/10 text-[var(--brand)]" : "text-slate-700 hover:bg-slate-50"
+        <div className="absolute top-20 left-0 w-full px-4 md:hidden z-50">
+          <nav 
+            ref={mobileNavRef} 
+            id="mobileNav" 
+            className="w-full max-w-sm mx-auto bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden animate-in fade-in slide-in-from-top-5 duration-200"
+          >
+            {/* User Profile Section */}
+            <div className="p-4 bg-slate-50/50 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-12 h-12 rounded-2xl shadow-sm border-2 border-white ${
+                    hasAvatar
+                      ? "bg-center bg-cover bg-no-repeat"
+                      : "bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg"
                   }`}
+                  style={hasAvatar ? { backgroundImage: `url(${avatarUrl})` } : undefined}
                 >
-                  {item.label}
+                  {!hasAvatar && avatarLetter}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900 truncate">{userName}</p>
+                  <p className="text-xs text-slate-500 font-medium truncate">{userEmail}</p>
+                  <span className="inline-block mt-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold uppercase tracking-wider rounded-md">
+                    {userRole}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 space-y-1">
+              <Link 
+                href="/" 
+                onClick={() => setMobileOpen(false)}
+                className={`w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-all duration-200 ${
+                  pathname === "/" 
+                    ? "bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20" 
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                <span className="font-bold text-sm">Dashboard</span>
+              </Link>
+              
+              <Link 
+                href="/corporativo" 
+                onClick={() => setMobileOpen(false)}
+                className={`w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-all duration-200 ${
+                  pathname === "/corporativo" 
+                    ? "bg-orange-50 text-orange-700 font-bold" 
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                <span className="text-sm">Corporativo</span>
+              </Link>
+
+              {/* Recrutamento Accordion */}
+              <div className="pt-2">
+                <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Recrutamento</p>
+                <div className="space-y-1">
+                  {recruitingNav.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors ${
+                        isActive(pathname, item.href)
+                          ? "bg-orange-50 text-orange-700 font-bold"
+                          : "text-slate-600 hover:bg-slate-50 font-medium"
+                      }`}
+                    >
+                       <span className={`w-1.5 h-1.5 rounded-full ${isActive(pathname, item.href) ? "bg-orange-500" : "bg-slate-300"}`}></span>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+               {/* Outros Accordion */}
+              <div className="pt-4 pb-2 border-t border-slate-100 mt-2">
+                <div className="grid grid-cols-2 gap-2 px-2">
+                   <Link href="/" className="px-3 py-2 rounded-lg bg-slate-50 text-slate-600 text-xs font-semibold text-center hover:bg-slate-100">
+                     Automação
+                   </Link>
+                   <Link href="/" className="px-3 py-2 rounded-lg bg-slate-50 text-slate-600 text-xs font-semibold text-center hover:bg-slate-100">
+                     Empresas
+                   </Link>
+                   <Link href="/perfil" className="px-3 py-2 rounded-lg bg-slate-50 text-slate-600 text-xs font-semibold text-center hover:bg-slate-100">
+                     Meu Perfil
+                   </Link>
+                   <button onClick={() => { logout(); setMobileOpen(false); router.push("/login"); }} className="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-semibold text-center hover:bg-red-100">
+                     Sair
+                   </button>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link 
+                  href="/vagas#nova" 
+                  onClick={() => setMobileOpen(false)}
+                  className="w-full px-4 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 active:scale-[0.98] transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                  Nova Vaga
                 </Link>
-              ))}
+              </div>
             </div>
-          </details>
-
-          <details className="group">
-            <summary className="w-full px-4 py-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold flex items-center justify-between gap-2 cursor-pointer transition-colors duration-200 list-none">
-              Menu
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="group-open:rotate-180 transition-transform">
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </summary>
-            <div className="mt-2 pl-4 space-y-2 border-l-2 border-slate-200">
-              <Link href="/" className="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-xs font-medium">Automação</Link>
-              <Link href="/" className="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-xs font-medium">Empresas</Link>
-              <Link href="/perfil" className="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-xs font-medium">Meu Perfil</Link>
-            </div>
-          </details>
-
-          <div className="pt-2">
-            <Link href="/vagas#nova" className="w-full px-4 py-3 rounded-lg bg-[var(--brand)]/10 border border-[var(--brand)] text-[var(--brand)] font-bold flex items-center gap-2 justify-center transition-colors duration-200 hover:bg-[var(--brand)]/20">
-              Nova vaga
-            </Link>
-          </div>
-        </nav>
+          </nav>
+        </div>
       )}
     </header>
   );

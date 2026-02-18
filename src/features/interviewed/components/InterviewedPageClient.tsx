@@ -519,102 +519,135 @@ export function InterviewedPageClient() {
         ))}
       </div>
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-7xl mx-auto w-full">
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-(--ink)">Candidatos Entrevistados</h1>
-            <p className="mt-1 text-sm text-slate-500">Candidatos que passaram por entrevista (RH, Gestor ou etapas posteriores)</p>
-            <Link href="/banco-talentos" className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-(--accent) hover:underline transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-              </svg>
-              Voltar para o Banco de Talentos completo
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-[1400px] mx-auto w-full">
+        {/* Header Section */}
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Sala de Entrevistas</h1>
+            <p className="text-slate-500 font-medium">Gestão de candidatos em fase de avaliação e feedback.</p>
+            <Link 
+              href="/banco-talentos" 
+              className="inline-flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+              Voltar para Banco de Talentos
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div className="flex -space-x-2">
+                   {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white ring-1 ring-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">?</div>)}
+                </div>
+                <div className="text-xs">
+                   <p className="font-extrabold text-slate-900">{entrevistados.length} Candidatos</p>
+                   <p className="text-slate-500 font-medium">Em processo</p>
+                </div>
+             </div>
+
             <button
               type="button"
               onClick={() => void abrirEditorTemplates()}
-              className="px-4 py-2 bg-slate-700 text-white text-sm font-extrabold rounded-lg hover:bg-slate-800 transition-colors"
-              title="Gerenciar templates de mensagens"
+              className="group flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all"
             >
-              <span className="hidden sm:inline">Templates</span>
-              <span className="sm:hidden">Tpl</span>
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+              Gerenciar Templates
             </button>
-            <span className="bg-(--accent) text-white px-4 py-2 rounded-lg text-sm font-extrabold">{entrevistados.length}</span>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-4 sm:p-5 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Buscar</label>
-              <input
-                value={filtroTexto}
-                onChange={(event) => setFiltroTexto(event.target.value)}
-                type="text"
-                placeholder="Nome, email, cargo..."
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-(--brand)/20 focus:border-(--brand)"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Etapa</label>
-              <select
-                value={filtroEtapa}
-                onChange={(event) => setFiltroEtapa(event.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-(--brand)/20 focus:border-(--brand)"
-              >
-                <option value="">Todas</option>
-                <option value="Entrevista RH">Entrevista RH</option>
-                <option value="Entrevista Gestor">Entrevista Gestor</option>
-                <option value="Teste Tecnico">Teste Técnico</option>
-                <option value="Proposta">Proposta</option>
-                <option value="Contratado">Contratado</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Vaga</label>
-              <select
-                value={filtroVaga}
-                onChange={(event) => setFiltroVaga(event.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-(--brand)/20 focus:border-(--brand)"
-              >
-                <option value="">Todas as vagas</option>
-                {vagas.map((vaga) => (
-                  <option key={vaga.id} value={String(vaga.id)}>
-                    {vaga.titulo}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Ordenar</label>
-              <select
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-(--brand)/20 focus:border-(--brand)"
-              >
-                <option value="recentes">Mais recentes</option>
-                <option value="antigos">Mais antigos</option>
-                <option value="nome_az">Nome A-Z</option>
-                <option value="nome_za">Nome Z-A</option>
-              </select>
+        {/* Dashboard Stats Row */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+           <div className="bg-white/60 backdrop-blur-md rounded-2xl p-5 border border-white/40 shadow-sm hover:shadow-md transition-all">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Entrevistas (RH)</p>
+              <div className="flex items-baseline gap-2">
+                 <span className="text-3xl font-black text-slate-800">{entrevistados.filter(c => normalizeEtapa(c.etapa) === "Entrevista RH").length}</span>
+                 <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Agendadas</span>
+              </div>
+           </div>
+           <div className="bg-white/60 backdrop-blur-md rounded-2xl p-5 border border-white/40 shadow-sm hover:shadow-md transition-all">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Entrevistas (Gestor)</p>
+              <div className="flex items-baseline gap-2">
+                 <span className="text-3xl font-black text-slate-800">{entrevistados.filter(c => normalizeEtapa(c.etapa) === 'Entrevista Gestor').length}</span>
+                 <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Técnicas</span>
+              </div>
+           </div>
+           <div className="bg-white/60 backdrop-blur-md rounded-2xl p-5 border border-white/40 shadow-sm hover:shadow-md transition-all">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Propostas</p>
+              <div className="flex items-baseline gap-2">
+                 <span className="text-3xl font-black text-slate-800">{entrevistados.filter(c => normalizeEtapa(c.etapa) === 'Proposta').length}</span>
+                 <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Em negociação</span>
+              </div>
+           </div>
+           <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100 shadow-sm">
+              <p className="text-xs font-bold text-emerald-600/70 uppercase tracking-widest mb-2">Aprovações</p>
+              <div className="flex items-baseline gap-2">
+                 <span className="text-3xl font-black text-emerald-800">{entrevistados.filter(c => normalizeEtapa(c.etapa) === 'Contratado' || normalizeEtapa(c.etapa) === 'Aprovado').length}</span>
+                 <span className="text-xs font-semibold text-emerald-700 bg-white/50 px-2 py-0.5 rounded-md">Este mês</span>
+              </div>
+           </div>
+        </section>
+
+        {/* Filters Section */}
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-1 mb-8">
+          <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+              <div className="lg:col-span-4">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Buscar</label>
+                <input
+                  value={filtroTexto}
+                  onChange={(event) => setFiltroTexto(event.target.value)}
+                  type="text"
+                  placeholder="Nome, email, cargo..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm"
+                />
+              </div>
+              <div className="lg:col-span-3">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Etapa</label>
+                <select
+                  value={filtroEtapa}
+                  onChange={(event) => setFiltroEtapa(event.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                >
+                  <option value="">Todas</option>
+                  <option value="Entrevista RH">Entrevista RH</option>
+                  <option value="Entrevista Gestor">Entrevista Gestor</option>
+                  <option value="Teste Tecnico">Teste Técnico</option>
+                  <option value="Proposta">Proposta</option>
+                  <option value="Contratado">Contratado</option>
+                </select>
+              </div>
+              <div className="lg:col-span-3">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Vaga</label>
+                <select
+                  value={filtroVaga}
+                  onChange={(event) => setFiltroVaga(event.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                >
+                  <option value="">Todas as vagas</option>
+                  {vagas.map((vaga) => (
+                    <option key={vaga.id} value={String(vaga.id)}>
+                      {vaga.titulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="lg:col-span-2">
+                 <button
+                  type="button"
+                  onClick={aplicarFiltros}
+                  className="w-full px-4 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 disabled:opacity-60 disabled:shadow-none"
+                  disabled={!hasUnsavedFilters}
+                >
+                  {hasUnsavedFilters ? 'Aplicar Filtros' : 'Filtros Ativos'}
+                </button>
+              </div>
             </div>
           </div>
-          <div className="mt-4 flex justify-end">
-            <button
-              type="button"
-              onClick={aplicarFiltros}
-              className="px-4 py-2 bg-(--accent) text-white text-sm font-extrabold rounded-lg hover:opacity-90 transition disabled:opacity-60"
-              disabled={!hasUnsavedFilters}
-            >
-              Aplicar Filtros
-            </button>
-          </div>
-        </div>
+        </section>
 
         {error && (
-          <div className="mb-4 rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 font-semibold flex items-center justify-between gap-3">
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 font-semibold flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
             <span>{error}</span>
             <button type="button" onClick={() => setError("")} className="text-red-700/70 hover:text-red-700 text-xs font-black">
               FECHAR
@@ -623,72 +656,87 @@ export function InterviewedPageClient() {
         )}
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-(--brand) border-t-transparent"></div>
-            <p className="mt-4 text-sm text-slate-500 font-semibold">Carregando candidatos...</p>
+          <div className="text-center py-24">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-slate-800"></div>
+            <p className="mt-4 text-sm text-slate-500 font-bold">Carregando candidatos...</p>
           </div>
         ) : entrevistados.length === 0 ? (
-          <div className="text-center py-12 glass rounded-2xl">
-            <h3 className="mt-2 text-lg font-semibold text-slate-700">Nenhum candidato entrevistado</h3>
-            <p className="mt-2 text-sm text-slate-500">Não há candidatos que passaram por entrevista no momento.</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Nenhum candidato aguardando</h3>
+            <p className="mt-2 text-sm text-slate-500">Não há candidatos na fase de entrevista com os filtros atuais.</p>
           </div>
         ) : (
-          <div className="glass rounded-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="table-soft w-full">
+              <table className="w-full">
                 <thead>
-                  <tr>
-                    <th className="text-left">Candidato</th>
-                    <th className="text-left">Cargo</th>
-                    <th className="text-left">Etapa</th>
-                    <th className="text-left">Vaga</th>
-                    <th className="text-left">Criado em</th>
-                    <th className="text-left">Ações</th>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Candidato</th>
+                    <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Cargo / Senioridade</th>
+                    <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Etapa Atual</th>
+                    <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Vaga Relacionada</th>
+                    <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Data Início</th>
+                    <th className="text-right py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {entrevistados.map((cand) => (
-                    <tr key={cand.id}>
-                      <td>
-                        <div>
-                          <p className="font-semibold text-slate-800">{cand.nome || "—"}</p>
-                          <p className="text-xs text-slate-500">{cand.email || "—"}</p>
+                    <tr key={cand.id} className="group hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
+                            {cand.nome ? cand.nome.substring(0, 2) : "??"}
+                          </div>
+                          <div>
+                             <p className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{cand.nome || "—"}</p>
+                             <p className="text-xs text-slate-500">{cand.email || "—"}</p>
+                          </div>
                         </div>
                       </td>
-                      <td>
-                        <p className="text-sm">{cand.cargo_desejado || "—"}</p>
-                        <p className="text-xs text-slate-500">{cand.senioridade || "—"}</p>
+                      <td className="py-4 px-6">
+                        <div className="flex flex-col">
+                           <span className="text-sm font-semibold text-slate-700">{cand.cargo_desejado || "—"}</span>
+                           <span className="text-xs text-slate-500 bg-slate-100 w-fit px-2 py-0.5 rounded mt-1">{cand.senioridade || "N/A"}</span>
+                        </div>
                       </td>
-                      <td>
-                        <span className={etapaBadgeClass(cand.etapa)}>{normalizeEtapa(cand.etapa) || "—"}</span>
+                      <td className="py-4 px-6">
+                        <span className={`${etapaBadgeClass(cand.etapa)} shadow-sm`}>{normalizeEtapa(cand.etapa) || "—"}</span>
                       </td>
-                      <td className="text-sm">{getVagaTitulo(cand)}</td>
-                      <td className="text-sm text-slate-500">{formatDate(cand.criado_em)}</td>
-                      <td>
-                        <div className="flex items-center gap-2">
+                      <td className="py-4 px-6 text-sm text-slate-600 font-medium">{getVagaTitulo(cand)}</td>
+                      <td className="py-4 px-6 text-xs font-bold text-slate-400">{formatDate(cand.criado_em)}</td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <button
                             type="button"
                             onClick={() => setSelected(cand)}
-                            className="text-(--brand) hover:underline text-sm font-semibold transition-colors"
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-white hover:border-slate-300"
                           >
-                            Ver detalhes
+                            Detalhes
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => void abrirModalTemplate(cand, "aprovar")}
-                            disabled={processingId === cand.id}
-                            className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 transition-all active:scale-[0.98] disabled:opacity-60"
-                          >
-                            ✓ Aprovar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void abrirModalTemplate(cand, "reprovar")}
-                            disabled={processingId === cand.id}
-                            className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-all active:scale-[0.98] disabled:opacity-60"
-                          >
-                            ✗ Reprovar
-                          </button>
+                          <div className="flex bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
+                             <button
+                               type="button"
+                               onClick={() => void abrirModalTemplate(cand, "aprovar")}
+                               disabled={processingId === cand.id}
+                               className="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                               title="Aprovar"
+                             >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                             </button>
+                             <div className="w-px bg-slate-200 mx-1"></div>
+                             <button
+                               type="button"
+                               onClick={() => void abrirModalTemplate(cand, "reprovar")}
+                               disabled={processingId === cand.id}
+                               className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                               title="Reprovar"
+                             >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                             </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

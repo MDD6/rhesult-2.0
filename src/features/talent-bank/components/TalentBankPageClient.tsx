@@ -531,109 +531,166 @@ export function TalentBankPageClient() {
 
       <main className="flex-1 w-full p-4 sm:p-6 lg:p-8">
         <div className="max-w-400 mx-auto">
-          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="mb-8 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#0A2725]">Banco de Talentos</h1>
-              <p className="text-sm text-slate-500 mt-1">Gerencie, filtre e acompanhe todos os candidatos.</p>
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Banco de Talentos</h1>
+              <p className="text-sm text-slate-500 mt-1 font-medium">Gestão unificada de capital humano</p>
             </div>
 
-            <div className="relative flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => setShowQuickActions((prev) => !prev)}
-                className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50"
-              >
-                Ações rápidas
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowExportModal(true)}
-                className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50"
-              >
-                Exportar
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(true)}
-                className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50"
-              >
-                Novo candidato
-              </button>
-              <button type="button" onClick={() => void load()} className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50">Atualizar</button>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex bg-slate-100/50 p-1 rounded-xl border border-slate-200/60 backdrop-blur-sm self-start sm:self-auto order-2 sm:order-1">
+                <button
+                  type="button"
+                  onClick={() => setView("dashboard")}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+                    view === "dashboard"
+                      ? "bg-white text-slate-800 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                  }`}
+                >
+                  Visão Geral
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("lista")}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+                    view === "lista"
+                      ? "bg-white text-slate-800 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                  }`}
+                >
+                  Lista
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("cards")}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+                    view === "cards"
+                      ? "bg-white text-slate-800 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                  }`}
+                >
+                  Galeria
+                </button>
+              </div>
 
-              {showQuickActions && (
-                <div className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-slate-200 bg-white shadow-lg p-2">
-                  <button type="button" onClick={() => { setView("dashboard"); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Abrir dashboard</button>
-                  <button type="button" onClick={() => { setView("lista"); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Abrir lista</button>
-                  <button type="button" onClick={() => { setView("cards"); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Abrir cards</button>
-                  <button type="button" onClick={() => { clearFiltros(); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Limpar filtros</button>
-                  <button type="button" onClick={() => { selectPage(); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Selecionar página</button>
-                  <button type="button" onClick={() => { setShowCreateModal(true); setShowQuickActions(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50">Novo candidato</button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setView("dashboard")} className={`px-4 py-2 rounded-full text-xs font-black ${view === "dashboard" ? "bg-(--brand) text-white" : "bg-white border border-gray-200 text-slate-700"}`}>Dashboard</button>
-              <button type="button" onClick={() => setView("lista")} className={`px-4 py-2 rounded-full text-xs font-black ${view === "lista" ? "bg-(--brand) text-white" : "bg-white border border-gray-200 text-slate-700"}`}>Lista</button>
-              <button type="button" onClick={() => setView("cards")} className={`px-4 py-2 rounded-full text-xs font-black ${view === "cards" ? "bg-(--brand) text-white" : "bg-white border border-gray-200 text-slate-700"}`}>Cards</button>
+              <div className="flex items-center gap-2 order-1 sm:order-2 self-end sm:self-auto">
+                 <button
+                  type="button"
+                  onClick={() => setShowExportModal(true)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 backdrop-blur-sm text-slate-600 text-xs font-bold hover:bg-white hover:border-slate-300 hover:shadow-sm transition-all"
+                >
+                  Exportar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all"
+                >
+                  + Novo Candidato
+                </button>
+              </div>
             </div>
           </div>
 
-          <section className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 mb-6 card-gradient">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+          <section className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-sm border border-white/20 p-5 mb-8 overflow-hidden relative group">
+             <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 via-white/20 to-slate-100/30 opacity-60 pointer-events-none" />
+             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
               <div className="sm:col-span-2 lg:col-span-2">
-                <label className="block text-xs font-semibold text-slate-600 mb-2">Buscar</label>
-                <input value={filtroTexto} onChange={(e) => setFiltroTexto(e.target.value)} placeholder="Nome, cargo, email..." className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm" />
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Buscar</label>
+                <div className="relative group">
+                  <input 
+                    value={filtroTexto} 
+                    onChange={(e) => setFiltroTexto(e.target.value)} 
+                    placeholder="Nome, cargo, email..." 
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm group-hover:shadow-md" 
+                  />
+                  <div className="absolute right-3 top-2.5 text-slate-400 pointer-events-none">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  </div>
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2">Cidade</label>
-                <input value={filtroCidade} onChange={(e) => setFiltroCidade(e.target.value)} placeholder="Cidade..." className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm" />
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Cidade</label>
+                <input 
+                  value={filtroCidade} 
+                  onChange={(e) => setFiltroCidade(e.target.value)} 
+                  placeholder="Cidade..." 
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm" 
+                />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2">Senioridade</label>
-                <select value={filtroSenioridade} onChange={(e) => setFiltroSenioridade(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm bg-white">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Senioridade</label>
+                <select 
+                  value={filtroSenioridade} 
+                  onChange={(e) => setFiltroSenioridade(e.target.value)} 
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                >
                   <option value="">Todas</option>
-                  {SENIORIDADES.map((s) => <option key={s}>{s}</option>)}
+                  {SENIORIDADES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2">Etapa</label>
-                <select value={filtroEtapa} onChange={(e) => setFiltroEtapa(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm bg-white">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Etapa</label>
+                <select 
+                  value={filtroEtapa} 
+                  onChange={(e) => setFiltroEtapa(e.target.value)} 
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                >
                   <option value="">Todas</option>
-                  {ETAPAS.map((s) => <option key={s}>{s}</option>)}
+                  {ETAPAS.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2">Vaga</label>
-                <select value={filtroVaga} onChange={(e) => setFiltroVaga(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm bg-white">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Vaga</label>
+                <select 
+                  value={filtroVaga} 
+                  onChange={(e) => setFiltroVaga(e.target.value)} 
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                >
                   <option value="">Todas</option>
                   {vagas.map((v) => <option key={String(v.id)} value={String(v.id)}>{v.titulo}</option>)}
                 </select>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 items-center">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">Ordenar:</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-white border border-slate-200 text-slate-700 text-xs rounded-lg px-2 py-1.5">
-                <option value="recentes">Mais recentes</option>
-                <option value="antigos">Mais antigos</option>
-                <option value="nome_az">Nome A-Z</option>
-                <option value="nome_za">Nome Z-A</option>
-              </select>
+            <div className="mt-6 pt-4 border-t border-slate-200/60 flex flex-wrap gap-3 items-center justify-between">
+              <div className="flex items-center gap-2">
+                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-1">Ordenar por:</span>
+                 <div className="flex bg-slate-100 p-1 rounded-lg">
+                    <button 
+                      onClick={() => setSortBy('recentes')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${sortBy === 'recentes' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      Recentes
+                    </button>
+                    <button 
+                       onClick={() => setSortBy('nome_az')}
+                       className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${sortBy === 'nome_az' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      A-Z
+                    </button>
+                 </div>
+              </div>
 
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-2">Exibir:</span>
-              <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} className="bg-white border border-slate-200 text-slate-700 text-xs rounded-lg px-2 py-1.5">
-                {[6, 9, 12, 18, 24].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-
-              <button
-                type="button"
-                onClick={clearFiltros}
-                className="ml-auto px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-extrabold bg-white hover:bg-slate-50"
-              >
-                Limpar filtros
-              </button>
+              <div className="flex items-center gap-2">
+                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-1">Exibir:</span>
+                 <select 
+                    value={porPagina} 
+                    onChange={(e) => setPorPagina(Number(e.target.value))} 
+                    className="bg-white border-none py-1.5 pl-3 pr-8 rounded-lg text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200 cursor-pointer"
+                 >
+                   {[6, 9, 12, 18, 24].map((n) => <option key={n} value={n}>{n} itens</option>)}
+                 </select>
+                 
+                 <button
+                   type="button"
+                   onClick={clearFiltros}
+                   className="ml-2 px-4 py-1.5 rounded-lg text-xs font-bold text-red-500 hover:bg-red-50 transition-colors"
+                 >
+                   Limpar Filtros
+                 </button>
+              </div>
             </div>
           </section>
 
@@ -652,27 +709,67 @@ export function TalentBankPageClient() {
           )}
 
           {view === "dashboard" && (
-            <section className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <article className="glass p-5 card-spotlight"><p className="text-xs font-bold text-slate-500">Total</p><p className="text-3xl font-black text-(--ink)">{stats.total}</p></article>
-                <article className="glass p-5 card-spotlight"><p className="text-xs font-bold text-slate-500">Fortaleza</p><p className="text-3xl font-black text-(--ink)">{stats.fortaleza}</p></article>
-                <article className="glass p-5 card-spotlight"><p className="text-xs font-bold text-slate-500">Pleno/Sênior</p><p className="text-3xl font-black text-(--ink)">{stats.plenoSenior}</p></article>
-                <article className="glass p-5 card-spotlight"><p className="text-xs font-bold text-slate-500">Últimos 30 dias</p><p className="text-3xl font-black text-(--ink)">{stats.ultMes}</p></article>
+            <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <article className="relative overflow-hidden bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition-all duration-500">
+                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" className="text-blue-600"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                   </div>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total de Candidatos</p>
+                   <p className="text-4xl font-black text-slate-800 tracking-tight">{stats.total}</p>
+                   <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-full border border-emerald-100">
+                      <span>+12%</span>
+                      <span className="text-emerald-600/70 font-medium">vs. mês anterior</span>
+                   </div>
+                </article>
+
+                <article className="relative overflow-hidden bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition-all duration-500">
+                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" className="text-indigo-600"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                   </div>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Senioridade Alta</p>
+                   <p className="text-4xl font-black text-slate-800 tracking-tight">{stats.plenoSenior}</p>
+                   <p className="text-xs text-slate-500 mt-2 font-medium">Pleno e Sênior</p>
+                </article>
+
+                <article className="relative overflow-hidden bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition-all duration-500">
+                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" className="text-amber-600"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                   </div>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Atividade Recente</p>
+                   <p className="text-4xl font-black text-slate-800 tracking-tight">{stats.ultMes}</p>
+                   <p className="text-xs text-slate-500 mt-2 font-medium">Novos nos últimos 30 dias</p>
+                </article>
+
+                <article className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-lg shadow-slate-900/10 group hover:shadow-slate-900/20 transition-all duration-500">
+                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" className="text-white"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                   </div>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Fortaleza / CE</p>
+                   <p className="text-4xl font-black text-white tracking-tight">{stats.fortaleza}</p>
+                   <p className="text-xs text-slate-400 mt-2 font-medium">Candidatos locais</p>
+                </article>
               </div>
 
-              <div className="glass p-5">
-                <h2 className="font-black text-(--ink) text-base mb-4">Pipeline por etapa</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="bg-white/70 backdrop-blur-md border border-white/50 p-6 rounded-3xl shadow-sm">
+                <h2 className="font-extrabold text-slate-800 text-lg mb-6 flex items-center gap-2">
+                   <span className="w-1.5 h-6 bg-[var(--brand)] rounded-full"></span>
+                   Funil de Contratação
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {stats.porEtapa.map((row) => {
                     const pct = stats.total ? Math.round((row.total / stats.total) * 100) : 0;
                     return (
-                      <button key={row.etapa} type="button" onClick={() => { setFiltroEtapa(row.etapa); setView("lista"); }} className="text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-(--brand) transition-all">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={badgeClass(row.etapa)}>{row.etapa}</span>
-                          <span className="text-xs font-black text-slate-800">{row.total}</span>
+                      <button key={row.etapa} type="button" onClick={() => { setFiltroEtapa(row.etapa); setView("lista"); }} className="group text-left p-4 rounded-2xl bg-white border border-slate-100 hover:border-slate-300 hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                        <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${row.total > 0 ? "bg-[var(--brand)]" : "bg-slate-200"}`} />
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <span className={`${badgeClass(row.etapa)} scale-90 origin-left`}>{row.etapa}</span>
                         </div>
-                        <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden"><div className="h-2 rounded-full bg-(--brand)" style={{ width: `${pct}%` }} /></div>
-                        <p className="mt-2 text-[11px] text-slate-500 font-extrabold">{pct}% do total</p>
+                        <div className="flex items-end justify-between">
+                            <span className="text-2xl font-black text-slate-800">{row.total}</span>
+                            <span className="text-[10px] font-bold text-slate-400 mb-1.5">{pct}%</span>
+                        </div>
+                         <div className="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full bg-[var(--brand)] transition-all duration-1000" style={{ width: `${pct}%` }} /></div>
                       </button>
                     );
                   })}

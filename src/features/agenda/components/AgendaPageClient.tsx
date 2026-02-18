@@ -407,193 +407,251 @@ export function AgendaPageClient() {
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        {error && <div className="mb-3 text-sm text-red-600 font-semibold">{error}</div>}
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
+        {error && (
+           <div className="mb-6 rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 font-semibold flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
+             <span>{error}</span>
+             <button type="button" onClick={() => setError("")} className="text-red-700/70 hover:text-red-700 text-xs font-black">FECHAR</button>
+           </div>
+        )}
 
-        <section className="glass rounded-2xl px-4 py-3 mb-4 flex flex-col gap-3">
-          <div className="flex items-start md:items-center justify-between gap-3 flex-col md:flex-row">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Agenda de Entrevistas</h1>
-              <p className="text-xs text-gray-500">Arraste para reagendar. Clique para ver detalhes.</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => openCreateModal()} className="text-xs px-3 py-1.5 rounded-full bg-[#F58634] text-white font-semibold hover:bg-[#e9792e]">
-                + Nova entrevista
-              </button>
-              <button onClick={() => showToast("warn", "Sincronização Google ainda não conectada ao backend.")} className="text-xs px-3 py-1.5 rounded-full border border-gray-300 bg-white hover:bg-gray-50">
-                Sincronizar Google
-              </button>
-              <button onClick={exportCsv} className="text-xs px-3 py-1.5 rounded-full border border-gray-300 bg-white hover:bg-gray-50">
-                Exportar CSV
-              </button>
-            </div>
-          </div>
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+           <div className="space-y-2">
+             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Agenda de Entrevistas</h1>
+             <p className="text-slate-500 font-medium">Cronograma de avaliações e compromissos do time.</p>
+           </div>
+           
+           <div className="flex flex-wrap items-center gap-3">
+              <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                 <div className="flex -space-x-2">
+                    {[1,2].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white ring-1 ring-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">?</div>)}
+                 </div>
+                 <div className="text-xs">
+                    <p className="font-extrabold text-slate-900">{metrics.next24h} Entrevistas</p>
+                    <p className="text-slate-500 font-medium">Próximas 24h</p>
+                 </div>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-            <div className="md:col-span-2">
-              <label className="block text-[11px] text-gray-600 mb-1">Busca rápida (candidato/vaga)</label>
-              <input
-                type="search"
-                value={filters.quickSearch}
-                onChange={(event) => setFilters((prev) => ({ ...prev, quickSearch: event.target.value }))}
-                placeholder="Ex.: Ana Silva, Dev Full Stack..."
-                className="w-full rounded-xl bg-white border border-gray-300 px-3 py-2 text-xs focus:ring-1 focus:ring-[#F58634] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] text-gray-600 mb-1">Status</label>
-              <select
-                value={filters.status}
-                onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value as AgendaFilters["status"] }))}
-                className="w-full rounded-xl bg-white border border-gray-300 px-3 py-2 text-xs"
+              <button 
+                onClick={() => openCreateModal()} 
+                className="group flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all"
               >
-                <option value="">Todos</option>
-                <option>Agendada</option>
-                <option>Confirmada</option>
-                <option>Reagendada</option>
-                <option>Cancelada</option>
-                <option>Realizada</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] text-gray-600 mb-1">Tipo</label>
-              <select
-                value={filters.tipo}
-                onChange={(event) => setFilters((prev) => ({ ...prev, tipo: event.target.value as AgendaFilters["tipo"] }))}
-                className="w-full rounded-xl bg-white border border-gray-300 px-3 py-2 text-xs"
-              >
-                <option value="">Todos</option>
-                <option>RH</option>
-                <option>Tecnica</option>
-                <option>Gestor</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] text-gray-600 mb-1">Recrutador</label>
-              <select
-                value={filters.recrutadorId}
-                onChange={(event) => setFilters((prev) => ({ ...prev, recrutadorId: event.target.value }))}
-                className="w-full rounded-xl bg-white border border-gray-300 px-3 py-2 text-xs"
-              >
-                <option value="">Todos</option>
-                <option value="1">João Silva</option>
-                <option value="2">Janine Feitosa</option>
-              </select>
+                <svg className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                Nova Entrevista
+              </button>
+           </div>
+        </div>
+
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-1 mb-8">
+          <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+               <div className="lg:col-span-5">
+                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Buscar</label>
+                 <div className="relative group">
+                   <input
+                     type="search"
+                     value={filters.quickSearch}
+                     onChange={(event) => setFilters((prev) => ({ ...prev, quickSearch: event.target.value }))}
+                     placeholder="Candidato, vaga, entrevistador..."
+                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm"
+                   />
+                   <div className="absolute right-3 top-2.5 text-slate-400 pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="lg:col-span-2">
+                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Status</label>
+                 <select
+                   value={filters.status}
+                   onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value as AgendaFilters["status"] }))}
+                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                 >
+                   <option value="">Todos</option>
+                   <option>Agendada</option>
+                   <option>Confirmada</option>
+                   <option>Reagendada</option>
+                   <option>Cancelada</option>
+                   <option>Realizada</option>
+                 </select>
+               </div>
+
+               <div className="lg:col-span-2">
+                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Tipo</label>
+                 <select
+                   value={filters.tipo}
+                   onChange={(event) => setFilters((prev) => ({ ...prev, tipo: event.target.value as AgendaFilters["tipo"] }))}
+                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:bg-white text-sm font-medium transition-all outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 shadow-sm appearance-none cursor-pointer"
+                 >
+                   <option value="">Todos</option>
+                   <option>RH</option>
+                   <option>Tecnica</option>
+                   <option>Gestor</option>
+                 </select>
+               </div>
+               
+               <div className="lg:col-span-3 flex items-center gap-2">
+                   <button onClick={exportCsv} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50 transition-all">
+                     Exportar
+                   </button>
+                   <button onClick={() => showToast("warn", "Sincronização Google em breve.")} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                     <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+                     Sync
+                   </button>
+               </div>
             </div>
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4">
-          <div className="flex flex-col gap-3">
-            <section className="glass rounded-2xl p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <button onClick={() => openCreateModal()} className="px-4 py-2 bg-[#F58634] text-white text-xs font-semibold rounded-full">Nova Entrevista</button>
-                <button onClick={exportCsv} className="px-3 py-2 border border-gray-300 bg-white text-xs rounded-full">Exportar CSV</button>
-                <button onClick={() => showToast("warn", "Sincronização Google ainda não conectada ao backend.")} className="px-3 py-2 border border-gray-300 bg-white text-xs rounded-full">Sincronizar</button>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+            <section className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[700px]">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                 <div className="flex bg-slate-200/50 p-1 rounded-lg">
+                    {["dayGridMonth", "timeGridWeek", "timeGridDay", "listWeek"].map((item) => (
+                      <button
+                        key={item}
+                        onClick={() => onViewChange(item as CalendarView)}
+                         className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                          view === item 
+                            ? "bg-white text-slate-900 shadow-sm" 
+                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                        }`}
+                      >
+                       {item === "dayGridMonth" ? "Mês" : item === "timeGridWeek" ? "Semana" : item === "timeGridDay" ? "Dia" : "Lista"}
+                      </button>
+                    ))}
+                 </div>
+
+                 <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100">
+                       <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+                       <span className="text-[10px] font-bold text-amber-700 uppercase">Pendentes: {metrics.pendenteConfirm}</span>
+                    </div>
+                    {metrics.slaVencido > 0 && (
+                      <div className="flex items-center gap-1.5 bg-red-50 px-2.5 py-1 rounded-md border border-red-100">
+                         <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                         <span className="text-[10px] font-bold text-red-700 uppercase">Atrasados: {metrics.slaVencido}</span>
+                      </div>
+                    )}
+                 </div>
               </div>
-
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  {["dayGridMonth", "timeGridWeek", "timeGridDay", "listWeek"].map((item) => (
-                    <button
-                      key={item}
-                      onClick={() => onViewChange(item as CalendarView)}
-                      className={`text-xs px-3 py-1.5 rounded-full ${view === item ? "bg-[#0A2725] text-white" : "bg-gray-100 text-gray-700"}`}
-                    >
-                      {item === "dayGridMonth" ? "Mês" : item === "timeGridWeek" ? "Semana" : item === "timeGridDay" ? "Dia" : "Lista"}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="text-[11px] text-gray-600 flex items-center gap-2">
-                  <span className="font-semibold text-gray-800">SLA:</span>
-                  <span className="px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">Pendentes: {metrics.pendenteConfirm}</span>
-                  <span className="px-2 py-1 rounded-full bg-red-50 text-red-700 border border-red-200">Vencidos: {metrics.slaVencido}</span>
-                </div>
+              
+              <div className="flex-1 p-4 overflow-hidden relative calendar-wrapper">
+                 <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+                    locale="pt-br"
+                    initialView="dayGridMonth"
+                    headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+                    nowIndicator
+                    editable
+                    selectable
+                    dayMaxEvents={3}
+                    events={events}
+                    eventContent={eventContent}
+                    dateClick={onDateClick}
+                    eventClick={onEventClick}
+                    eventDrop={(arg) => {
+                      if (!window.confirm("Confirmar reagendamento deste evento?")) {
+                        arg.revert();
+                        return;
+                      }
+                      void persistMove(arg);
+                    }}
+                    eventResize={(arg) => {
+                      if (!window.confirm("Confirmar alteração de duração?")) {
+                        arg.revert();
+                        return;
+                      }
+                      void persistMove(arg);
+                    }}
+                    height="100%"
+                  />
               </div>
-            </section>
-
-            <section className="glass rounded-2xl p-3 min-h-140">
-              <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                locale="pt-br"
-                initialView="dayGridMonth"
-                headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
-                nowIndicator
-                editable
-                selectable
-                dayMaxEvents={3}
-                events={events}
-                eventContent={eventContent}
-                dateClick={onDateClick}
-                eventClick={onEventClick}
-                eventDrop={(arg) => {
-                  if (!window.confirm("Confirmar reagendamento deste evento?")) {
-                    arg.revert();
-                    return;
-                  }
-                  void persistMove(arg);
-                }}
-                eventResize={(arg) => {
-                  if (!window.confirm("Confirmar alteração de duração?")) {
-                    arg.revert();
-                    return;
-                  }
-                  void persistMove(arg);
-                }}
-              />
             </section>
           </div>
 
-          <aside className="flex flex-col gap-3">
-            <section className="glass rounded-2xl flex flex-col h-85">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-6">
+            <section className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[400px]">
+              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
-                  <p className="text-xs font-semibold text-gray-800">Detalhes</p>
-                  <p className="text-[11px] text-gray-500">Clique em um evento para ações rápidas.</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Detalhes</p>
                 </div>
-                <button onClick={() => setSelectedEventId(null)} className="text-[11px] px-2 py-1 rounded-full border border-gray-300 bg-white">Limpar</button>
+                {selectedEventId && (
+                  <button 
+                    onClick={() => setSelectedEventId(null)} 
+                    className="text-[10px] font-bold px-2 py-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300"
+                  >
+                    FECHAR
+                  </button>
+                )}
               </div>
-              <div className="flex-1 overflow-y-auto px-4 py-3 text-sm text-gray-800">
+              <div className="flex-1 overflow-y-auto px-5 py-4">
                 {!selectedEntrevista ? (
-                  <div className="flex flex-col items-center justify-center text-center mt-6 text-xs text-gray-500">
-                    <div className="w-10 h-10 rounded-full border border-dashed border-gray-300 flex items-center justify-center mb-2">📅</div>
-                    <p className="font-medium text-gray-700">Nenhuma entrevista selecionada</p>
-                    <p className="mt-1">Clique em um evento para ver detalhes completos.</p>
+                  <div className="flex flex-col items-center justify-center text-center mt-10 space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                       <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-sm">Selecione um evento</p>
+                      <p className="text-xs text-slate-500 mt-1">Clique no calendário para ver os detalhes.</p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-3 text-xs">
+                  <div className="space-y-5">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-[11px] text-gray-500 mb-1">Candidato</p>
-                        <p className="text-sm font-semibold text-gray-900">{selectedEntrevista.candidato_nome}</p>
-                        <p className="text-[11px] text-gray-500 mt-1">Vaga • <span className="font-medium text-gray-700">{selectedEntrevista.vaga_titulo}</span></p>
+                       <div>
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Candidato</p>
+                          <p className="text-base font-bold text-slate-900">{selectedEntrevista.candidato_nome}</p>
+                          <p className="text-xs font-semibold text-(--brand) mt-0.5">{selectedEntrevista.vaga_titulo}</p>
+                       </div>
+                       <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                          selectedEntrevista.status === 'Confirmada' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                          selectedEntrevista.status === 'Agendada' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                          'bg-slate-50 text-slate-600 border-slate-200'
+                       }`}>
+                          {selectedEntrevista.status}
+                       </span>
+                    </div>
+
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-3 mb-2">
+                         <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                         </div>
+                         <div>
+                            <p className="text-xs font-bold text-slate-700">Horário</p>
+                            <p className="text-xs text-slate-500">
+                              {new Date(selectedEntrevista.data_inicio).toLocaleDateString("pt-BR")} • {new Date(selectedEntrevista.data_inicio).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                              {" - "}
+                              {new Date(selectedEntrevista.data_fim).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                         </div>
                       </div>
-                      <span className="px-2 py-1 rounded-full border text-[11px] bg-white">{selectedEntrevista.status}</span>
                     </div>
 
                     <div>
-                      <p className="text-[11px] text-gray-500 mb-1">Horário</p>
-                      <p>
-                        {new Date(selectedEntrevista.data_inicio).toLocaleDateString("pt-BR")} • {new Date(selectedEntrevista.data_inicio).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                        {" - "}
-                        {new Date(selectedEntrevista.data_fim).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Observações</p>
+                      <div className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 min-h-[60px]">
+                         {selectedEntrevista.observacoes || <span className="text-slate-400 italic">Sem observações.</span>}
+                      </div>
                     </div>
 
-                    <div>
-                      <p className="text-[11px] text-gray-500 mb-1">Observações</p>
-                      <p className="whitespace-pre-wrap">{selectedEntrevista.observacoes || "-"}</p>
-                    </div>
-
-                    <div className="pt-3 border-t border-gray-200 flex flex-wrap gap-2">
-                      <button onClick={() => openEditModal(selectedEntrevista)} className="px-3 py-1.5 rounded-full border border-gray-300 hover:bg-gray-50 text-[11px]">Editar/Reagendar</button>
-                      <button onClick={() => void updateStatus(selectedEntrevista.id, "Confirmada")} className="px-3 py-1.5 rounded-full border border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-[11px]">Confirmar</button>
-                      <button onClick={() => void updateStatus(selectedEntrevista.id, "Cancelada")} className="px-3 py-1.5 rounded-full border border-red-300 text-red-700 hover:bg-red-50 text-[11px]">Cancelar</button>
-                      {selectedEntrevista.candidato_telefone ? (
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                       <button onClick={() => openEditModal(selectedEntrevista)} className="col-span-2 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                          Editar / Reagendar
+                       </button>
+                       <button onClick={() => void updateStatus(selectedEntrevista.id, "Confirmada")} className="py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors">
+                          Confirmar
+                       </button>
+                       <button onClick={() => void updateStatus(selectedEntrevista.id, "Cancelada")} className="py-2 rounded-lg bg-red-50 text-red-700 text-xs font-bold hover:bg-red-100 transition-colors">
+                          Cancelar
+                       </button>
+                       {selectedEntrevista.candidato_telefone && (
                         <a
-                          className="px-3 py-1.5 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 text-[11px]"
+                          className="col-span-2 py-2 rounded-lg bg-[#25D366] text-white text-xs font-bold hover:bg-[#20bd5a] text-center flex items-center justify-center gap-2"
                           target="_blank"
                           rel="noopener noreferrer"
                           href={toWhatsAppLink(
@@ -601,49 +659,43 @@ export function AgendaPageClient() {
                             `Olá, ${selectedEntrevista.candidato_nome}! Sua entrevista para ${selectedEntrevista.vaga_titulo} está ${selectedEntrevista.status}.`
                           )}
                         >
-                          WhatsApp
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                          Confirmar no WhatsApp
                         </a>
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 )}
               </div>
             </section>
 
-            <section className="glass rounded-2xl flex flex-col h-70">
-              <div className="px-4 py-3 border-b border-gray-200">
-                <p className="text-xs font-semibold text-gray-800">⏰ Próximas Entrevistas</p>
-                <p className="text-[11px] text-gray-500">Entrevistas dos próximos 7 dias.</p>
+            <section className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[300px]">
+              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                 <div>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Próximas</p>
+                 </div>
+                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600">7 Dias</span>
               </div>
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 text-xs">
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
                 {!nextEvents.length ? (
-                  <div className="flex items-center justify-center h-full text-gray-400">Nenhuma entrevista próxima</div>
+                  <div className="flex items-center justify-center h-full text-slate-400 text-xs font-medium">Nenhuma entrevista próxima</div>
                 ) : (
                   nextEvents.map((item) => (
-                    <button key={item.id} onClick={() => setSelectedEventId(item.id)} className="w-full text-left p-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm transition">
-                      <p className="text-[11px] font-semibold text-gray-900 truncate">{item.candidato_nome}</p>
-                      <p className="text-[10px] text-gray-500 truncate">{item.vaga_titulo}</p>
-                      <div className="mt-1 flex items-center justify-between">
-                        <span className="text-[11px] font-medium text-gray-700">{new Date(item.data_inicio).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-                        <span className="text-[10px] text-gray-500">{new Date(item.data_inicio).toLocaleDateString("pt-BR")}</span>
+                    <button key={item.id} onClick={() => setSelectedEventId(item.id)} className="w-full text-left p-3 rounded-xl border border-slate-100 bg-white hover:border-slate-300 transition-all hover:shadow-sm group">
+                      <div className="flex items-start justify-between mb-1">
+                         <p className="text-xs font-bold text-slate-800 truncate group-hover:text-(--brand)">{item.candidato_nome}</p>
+                         <span className={`w-2 h-2 rounded-full ${STATUS_COLORS[item.status] === '#16a34a' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 truncate mb-2">{item.vaga_titulo}</p>
+                      <div className="flex items-center gap-2">
+                         <div className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-600">
+                             {new Date(item.data_inicio).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                         </div>
+                         <span className="text-[10px] text-slate-400">{new Date(item.data_inicio).toLocaleDateString("pt-BR", {day: '2-digit', month: '2-digit'})}</span>
                       </div>
                     </button>
                   ))
                 )}
-              </div>
-            </section>
-
-            <section className="glass rounded-2xl p-4 text-xs text-gray-800">
-              <p className="text-[11px] font-semibold text-gray-800 mb-3">Resumo & SLA</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between"><span className="text-gray-600">Total agendadas</span><span className="font-semibold text-gray-900">{metrics.agendadas}</span></div>
-                <div className="flex items-center justify-between"><span className="text-gray-600">Confirmadas</span><span className="font-semibold text-emerald-600">{metrics.confirmadas}</span></div>
-                <div className="flex items-center justify-between"><span className="text-gray-600">Reagendadas</span><span className="font-semibold text-yellow-700">{metrics.reagendadas}</span></div>
-                <div className="flex items-center justify-between"><span className="text-gray-600">Canceladas</span><span className="font-semibold text-red-600">{metrics.canceladas}</span></div>
-                <div className="flex items-center justify-between"><span className="text-gray-600">Realizadas</span><span className="font-semibold text-gray-800">{metrics.realizadas}</span></div>
-                <div className="pt-2 border-t border-dashed border-gray-200 flex items-center justify-between"><span className="text-gray-600">Próximas 24h</span><span className="font-semibold text-indigo-700">{metrics.next24h}</span></div>
-                <div className="flex items-center justify-between"><span className="text-gray-600">Pendente confirmação</span><span className="font-semibold text-amber-700">{metrics.pendenteConfirm}</span></div>
-                <div className="flex items-center justify-between"><span className="text-gray-600">SLA vencido</span><span className="font-semibold text-red-700">{metrics.slaVencido}</span></div>
               </div>
             </section>
           </aside>

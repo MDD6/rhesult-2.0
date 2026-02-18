@@ -45,7 +45,7 @@ export function LoginPageClient() {
 
       setToken(token);
       if (response.user) {
-        setUser(response.user as User);
+        setUser(response.user as unknown as User);
       }
 
       // Aguardar um pouco para o cookie httpOnly ser processado pelo navegador
