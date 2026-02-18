@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/", "/login"];
-const PUBLIC_PREFIXES = ["/api/auth/login", "/api/auth/logout", "/api/public", "/api/vagas"];
+const PUBLIC_PREFIXES = ["/api/auth/login", "/api/auth/logout", "/api/public"];
 
 function isStaticPath(pathname: string) {
   return pathname.startsWith("/_next") || /\.[^/]+$/.test(pathname);
@@ -17,15 +17,24 @@ function isPublicPath(pathname: string) {
   );
 }
 
+function isPublicApiRequest(pathname: string, method: string) {
+  if (pathname === "/api/vagas" || pathname.startsWith("/api/vagas/")) {
+    return method.toUpperCase() === "GET";
+  }
+
+  return false;
+}
+
 function isApiPath(pathname: string) {
   return pathname.startsWith("/api");
 }
 
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  const method = request.method;
   const token = request.cookies.get("rhesult_token")?.value;
 
-  if (isStaticPath(pathname) || isPublicPath(pathname)) {
+  if (isStaticPath(pathname) || isPublicPath(pathname) || isPublicApiRequest(pathname, method)) {
     return NextResponse.next();
   }
 

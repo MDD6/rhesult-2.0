@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_BACKEND_BASE = "http://localhost:4000";
 
@@ -63,7 +63,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const apiBase = getBackendBase();
 
   const body = await parseBody(request);
@@ -71,10 +71,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
   }
 
+  const authHeader = request.headers.get("Authorization") || "";
+  const tokenFromHeader = authHeader.replace("Bearer ", "").trim();
+  const tokenFromCookie = request.cookies.get("rhesult_token")?.value || "";
+  const token = tokenFromHeader || tokenFromCookie;
+
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   try {
     const response = await fetch(buildEndpoint(apiBase, "/api/vagas"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body),
       cache: "no-store",
     });

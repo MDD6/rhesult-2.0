@@ -38,6 +38,10 @@ export type CreateCandidatoInput = {
 
 export type UpdateCandidatoInput = Partial<CreateCandidatoInput>;
 
+type FetchCandidatosFilters = {
+  vagaId?: string | number;
+};
+
 function getApiBase() {
   if (typeof window !== "undefined") {
     const globalAuth = (window as Window & { RhesultAuth?: { apiBase?: () => string } }).RhesultAuth;
@@ -82,9 +86,17 @@ function normalizeCandidate(input: Record<string, unknown>): Candidato {
   };
 }
 
-export async function fetchCandidatos(): Promise<Candidato[]> {
+export async function fetchCandidatos(filters?: FetchCandidatosFilters): Promise<Candidato[]> {
   const apiBase = getApiBase();
-  const url = apiBase ? `${apiBase}/api/candidatos` : "/api/candidatos";
+  const baseUrl = apiBase ? `${apiBase}/api/candidatos` : "/api/candidatos";
+  const searchParams = new URLSearchParams();
+
+  if (filters?.vagaId !== undefined && filters.vagaId !== null && String(filters.vagaId).trim() !== "") {
+    searchParams.set("vaga_id", String(filters.vagaId));
+  }
+
+  const query = searchParams.toString();
+  const url = query ? `${baseUrl}?${query}` : baseUrl;
 
   const response = await fetch(url, {
     cache: "no-store",

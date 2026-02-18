@@ -42,11 +42,16 @@ async function parseBody(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const apiBase = getBackendBase();
 
   try {
-    const response = await fetch(buildEndpoint(apiBase, "/api/candidatos"), {
+    const requestUrl = new URL(request.url);
+    const queryString = requestUrl.searchParams.toString();
+    const endpoint = buildEndpoint(apiBase, "/api/candidatos");
+    const targetUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+    const response = await fetch(targetUrl, {
       method: "GET",
       cache: "no-store",
     });

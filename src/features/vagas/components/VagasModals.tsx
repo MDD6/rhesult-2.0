@@ -5,6 +5,7 @@ import { Vaga } from '../types';
 import { formatSalary } from '../services/vagasApi';
 import { submitApplicationRequest } from '@/features/landing/services/jobsApi';
 import type { JobApplication } from '@/features/landing/types';
+import { fetchCandidatos, type Candidato } from '@/features/talent-bank/services/talentBankApi';
 
 interface VagasModalsProps {
   showDetalhes: boolean;
@@ -46,6 +47,10 @@ export function VagasModals({
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [curriculumFile, setCurriculumFile] = useState<File | null>(null);
+  const [candidatosDaVaga, setCandidatosDaVaga] = useState<Candidato[]>([]);
+  const [loadingCandidatos, setLoadingCandidatos] = useState(false);
+  const [erroCandidatos, setErroCandidatos] = useState('');
+  const detalhesVagaId = detalhesVaga?.id;
   const [formDataCandidatura, setFormDataCandidatura] = useState<JobApplication>({
     vaga_id: '',
     nome: '',
@@ -87,6 +92,40 @@ export function VagasModals({
       resetCandidatura();
     }
   }, [showCandidatura, candidaturaVaga, resetCandidatura]);
+
+  useEffect(() => {
+    if (!showDetalhes || detalhesTab !== 'candidatos' || !detalhesVagaId) {
+      return;
+    }
+
+    let active = true;
+
+    const loadCandidatosByVaga = async () => {
+      setLoadingCandidatos(true);
+      setErroCandidatos('');
+
+      try {
+        const filtered = await fetchCandidatos({ vagaId: detalhesVagaId });
+        if (!active) return;
+        setCandidatosDaVaga(filtered);
+      } catch (error) {
+        if (!active) return;
+        console.error('Erro ao carregar candidatos da vaga:', error);
+        setErroCandidatos('Não foi possível carregar os candidatos desta vaga.');
+        setCandidatosDaVaga([]);
+      } finally {
+        if (active) {
+          setLoadingCandidatos(false);
+        }
+      }
+    };
+
+    void loadCandidatosByVaga();
+
+    return () => {
+      active = false;
+    };
+  }, [showDetalhes, detalhesTab, detalhesVagaId]);
 
   const openCandidaturaFromVaga = (vaga: Vaga) => {
     onOpenCandidatura(vaga);
@@ -232,8 +271,56 @@ export function VagasModals({
                   </div>
                 )}
 
-                {/* Candidatos, Sugestões, Histórico */}
-                {['candidatos', 'sugestoes', 'historico'].includes(detalhesTab) && (
+                {detalhesTab === 'candidatos' && (
+                  <div className="text-sm text-gray-700">
+                    {loadingCandidatos && (
+                      <p className="mb-3 text-slate-500">Carregando candidatos da vaga...</p>
+                    )}
+
+                    {erroCandidatos && (
+                      <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
+                        {erroCandidatos}
+                      </div>
+                    )}
+
+                    {!loadingCandidatos && !erroCandidatos && (
+                      <>
+                        <p className="mb-3 text-slate-600">
+                          {candidatosDaVaga.length > 0
+                            ? `${candidatosDaVaga.length} candidato(s) inscrito(s) nesta vaga.`
+                            : 'Nenhum candidato inscrito nesta vaga até o momento.'}
+                        </p>
+
+                        {candidatosDaVaga.length > 0 && (
+                          <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                            {candidatosDaVaga.map((cand) => (
+                              <div key={String(cand.id)} className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/60">
+                                <p className="font-semibold text-[#0A2725]">{cand.nome || 'Sem nome'}</p>
+                                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600">
+                                  <span>Etapa: {cand.etapa || 'Inscricao'}</span>
+                                  {cand.email && <span>Email: {cand.email}</span>}
+                                  {cand.telefone && <span>Telefone: {cand.telefone}</span>}
+                                  {cand.senioridade && <span>Senioridade: {cand.senioridade}</span>}
+                                  {cand.cidade && <span>Cidade: {cand.cidade}</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    <a
+                      href="/banco-talentos"
+                      className="mt-3 inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-[#0A2725] hover:bg-slate-50"
+                    >
+                      Ver Banco de Talentos
+                    </a>
+                  </div>
+                )}
+
+                {/* Sugestões e Histórico */}
+                {['sugestoes', 'historico'].includes(detalhesTab) && (
                   <div className="text-sm text-gray-600">
                     <p className="mb-3">Esta seção será integrada com o Banco de Talentos.</p>
                     <a
