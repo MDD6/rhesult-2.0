@@ -1,19 +1,28 @@
 import type { Job, JobApplication } from "../types";
 
+function normalizeClientApiBase(rawBase?: string) {
+  const value = (rawBase || "").trim();
+  if (!value) return "";
+
+  if (value === "/api") return "";
+
+  return value.replace(/\/$/, "");
+}
+
 function getApiBase() {
   if (typeof window !== "undefined") {
     const globalAuth = (window as Window & { RhesultAuth?: { apiBase?: () => string } }).RhesultAuth;
     if (globalAuth?.apiBase) {
-      return globalAuth.apiBase();
+      return normalizeClientApiBase(globalAuth.apiBase());
     }
   }
 
-  return process.env.NEXT_PUBLIC_API_BASE ?? "";
+  return normalizeClientApiBase(process.env.NEXT_PUBLIC_API_BASE);
 }
 
 export async function fetchJobsRequest(): Promise<Job[]> {
   const apiBase = getApiBase();
-  const url = apiBase ? `${apiBase}/api/vagas` : "/api/vagas";
+  const url = apiBase ? `${apiBase}/vagas` : "/api/vagas";
 
   try {
     const response = await fetch(`${url}?_t=${Date.now()}`, {
@@ -56,30 +65,30 @@ export async function submitApplicationRequest(
   file: File | null,
 ): Promise<void> {
   const apiBase = getApiBase();
-  const url = apiBase ? `${apiBase}/api/public/candidatos` : "/api/public/candidatos";
+  const url = apiBase ? `${apiBase}/public/candidatos` : "/api/public/candidatos";
 
   try {
     let body: BodyInit;
     const headers: Record<string, string> = {};
 
     if (file) {
-      // Use FormData when there's a file
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
           formData.append(key, typeof value === "boolean" ? String(value) : String(value));
         }
       });
+
       formData.append("curriculum_file", file);
       body = formData;
     } else {
-      // Use JSON when there's no file
       const jsonPayload: Record<string, unknown> = {};
       Object.entries(payload).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
           jsonPayload[key] = value;
         }
       });
+
       body = JSON.stringify(jsonPayload);
       headers["Content-Type"] = "application/json";
     }

@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4000";
+const DEFAULT_BACKEND_BASE = "http://localhost:4000";
+
+function normalizeBackendBase(rawBase?: string) {
+  const value = (rawBase || "").trim();
+
+  if (!value) return DEFAULT_BACKEND_BASE;
+  if (value.startsWith("/")) return DEFAULT_BACKEND_BASE;
+
+  const withProtocol = /^https?:\/\//i.test(value) ? value : `http://${value}`;
+
+  try {
+    const parsed = new URL(withProtocol);
+    if (parsed.port === "3000") {
+      return DEFAULT_BACKEND_BASE;
+    }
+    return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/$/, "");
+  } catch {
+    return DEFAULT_BACKEND_BASE;
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const apiBase = normalizeBackendBase(process.env.API_BASE || process.env.NEXT_PUBLIC_API_BASE);
     const contentType = req.headers.get("content-type") || "";
     let body: BodyInit;
     const forwardHeaders: Record<string, string> = {};
@@ -18,7 +38,7 @@ export async function POST(req: NextRequest) {
       body = await req.formData();
     }
 
-    const response = await fetch(`${API_BASE}/public/candidatos`, {
+    const response = await fetch(`${apiBase}/public/candidatos`, {
       method: "POST",
       body: body,
       headers: Object.keys(forwardHeaders).length > 0 ? forwardHeaders : undefined,

@@ -12,6 +12,7 @@ interface VagasListaProps {
   onDetalhes: (vaga: Vaga) => void;
   onEditar: (vaga: Vaga) => void;
   onExcluir: (vaga: Vaga) => void;
+  onCandidatar: (vaga: Vaga) => void;
 }
 
 export function VagasLista({
@@ -21,7 +22,8 @@ export function VagasLista({
   onPageChange,
   onDetalhes,
   onEditar,
-  onExcluir
+  onExcluir,
+  onCandidatar
 }: VagasListaProps) {
   const inicio = (paginaAtual - 1) * vagasPorPagina;
   const vagasPagina = vagas.slice(inicio, inicio + vagasPorPagina);
@@ -74,6 +76,12 @@ export function VagasLista({
                         className="text-xs px-3 py-1.5 rounded-full border border-gray-300 hover:bg-gray-50"
                       >
                         Detalhes
+                      </button>
+                      <button
+                        onClick={() => onCandidatar(v)}
+                        className="text-xs px-3 py-1.5 rounded-full border border-emerald-400 text-emerald-600 hover:bg-emerald-50"
+                      >
+                        Candidatar
                       </button>
                       <button
                         onClick={() => onEditar(v)}

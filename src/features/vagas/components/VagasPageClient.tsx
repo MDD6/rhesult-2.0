@@ -29,6 +29,8 @@ export function VagasPageClient() {
   const [editarVaga, setEditarVaga] = useState<Vaga | null>(null);
 
   const [showCriar, setShowCriar] = useState(false);
+  const [showCandidatura, setShowCandidatura] = useState(false);
+  const [candidaturaVaga, setCandidaturaVaga] = useState<Vaga | null>(null);
 
   const loadVagas = useCallback(async () => {
     setLoading(true);
@@ -122,6 +124,11 @@ export function VagasPageClient() {
     }
   };
 
+  const handleCandidatar = (vaga: Vaga) => {
+    setCandidaturaVaga(vaga);
+    setShowCandidatura(true);
+  };
+
   return (
     <>
       <AppHeader />
@@ -203,17 +210,17 @@ export function VagasPageClient() {
               onDetalhes={handleDetalhes}
               onEditar={handleEditar}
               onExcluir={handleExcluir}
+              onCandidatar={handleCandidatar}
             />
           )}
 
           {!loading && filteredVagas.length > 0 && currentView === 'cards' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <VagasCards
-                vagas={filteredVagas}
-                onDetalhes={handleDetalhes}
-                onEditar={handleEditar}
-              />
-            </div>
+            <VagasCards
+              vagas={filteredVagas}
+              onDetalhes={handleDetalhes}
+              onEditar={handleEditar}
+              onCandidatar={handleCandidatar}
+            />
           )}
 
           <VagasModals
@@ -228,6 +235,10 @@ export function VagasPageClient() {
             showCriar={showCriar}
             onCloseCriar={() => setShowCriar(false)}
             onSaveCriar={handleCreateVaga}
+            showCandidatura={showCandidatura}
+            candidaturaVaga={candidaturaVaga}
+            onCloseCandidatura={() => setShowCandidatura(false)}
+            onOpenCandidatura={handleCandidatar}
           />
         </div>
       </main>

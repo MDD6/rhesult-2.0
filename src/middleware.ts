@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/painel", "/admin", "/assets", "/banco-talentos", "/vagas"];
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/logout"];
+const PUBLIC_PATHS = ["/", "/login"];
+const PUBLIC_PREFIXES = ["/api/auth/login", "/api/auth/logout", "/api/public", "/api/vagas"];
 
 function isStaticPath(pathname: string) {
   return pathname.startsWith("/_next") || /\.[^/]+$/.test(pathname);
 }
 
 function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some((publicPath) => pathname === publicPath || pathname.startsWith(`${publicPath}/`));
+  if (PUBLIC_PATHS.some((publicPath) => pathname === publicPath)) {
+    return true;
+  }
+
+  return PUBLIC_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 }
 
-function isProtectedPath(pathname: string) {
-  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+function isApiPath(pathname: string) {
+  return pathname.startsWith("/api");
 }
 
 export function middleware(request: NextRequest) {
@@ -23,7 +29,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isProtectedPath(pathname) && !token) {
+  if (!token) {
+    if (isApiPath(pathname)) {
+      return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+    }
+
     const next = `${pathname}${search}`;
     const loginUrl = new URL(`/login?next=${encodeURIComponent(next)}`, request.url);
     return NextResponse.redirect(loginUrl);
@@ -33,5 +43,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/dashboard/:path*", "/painel/:path*", "/admin/:path*", "/assets/:path*", "/banco-talentos/:path*", "/vagas/:path*", "/api/auth/:path*"],
+  matcher: ["/:path*"],
 };

@@ -21,6 +21,8 @@ export interface User extends BaseEntity {
   email: string;
   role: "admin" | "rh" | "recruiter" | "candidate";
   ativo: boolean;
+  avatar_url?: string;
+  cargo?: string;
 }
 
 export interface AuthTokenPayload {

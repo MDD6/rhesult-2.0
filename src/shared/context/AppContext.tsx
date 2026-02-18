@@ -40,7 +40,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
    * Initialize app state from storage on mount
    */
   useEffect(() => {
-    const initializeApp = () => {
+    const initializeApp = async () => {
       if (typeof window === "undefined") return;
 
       try {
@@ -54,6 +54,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser) as User;
           setUserState(parsedUser);
+          return;
+        }
+
+        if (storedToken) {
+          const headers: HeadersInit = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${storedToken}`,
+          };
+
+          const response = await fetch("/api/auth/me", {
+            method: "GET",
+            headers,
+            cache: "no-store",
+          });
+
+          if (response.ok) {
+            const restoredUser = (await response.json()) as User;
+            setUserState(restoredUser);
+            localStorage.setItem(AUTH_CONFIG.USER_STORAGE_KEY, JSON.stringify(restoredUser));
+          } else if (response.status === 401) {
+            localStorage.removeItem(AUTH_CONFIG.TOKEN_STORAGE_KEY);
+            localStorage.removeItem(AUTH_CONFIG.USER_STORAGE_KEY);
+            setTokenState(null);
+            setUserState(null);
+          }
         }
       } catch (error) {
         console.error("Failed to initialize app state:", error);
@@ -153,11 +178,12 @@ export function useApp(): AppContextType {
  * Hook for authentication tracking
  */
 export function useAuth() {
-  const { user, isAuthenticated, token, setUser, setToken, logout } = useApp();
+  const { user, isAuthenticated, isLoading, token, setUser, setToken, logout } = useApp();
 
   return {
     user,
     isAuthenticated,
+    isLoading,
     token,
     setUser,
     setToken,

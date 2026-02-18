@@ -1,7 +1,33 @@
 import { NextResponse } from "next/server";
 
+const DEFAULT_BACKEND_BASE = "http://localhost:4000";
+
+function normalizeBackendBase(rawBase?: string) {
+  const value = (rawBase || "").trim();
+
+  if (!value) {
+    return DEFAULT_BACKEND_BASE;
+  }
+
+  if (value.startsWith("/")) {
+    return DEFAULT_BACKEND_BASE;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value.replace(/\/$/, "");
+  }
+
+  try {
+    const withProtocol = `http://${value}`;
+    const parsed = new URL(withProtocol);
+    return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/$/, "");
+  } catch {
+    return DEFAULT_BACKEND_BASE;
+  }
+}
+
 function getBackendBase() {
-  return process.env.API_BASE || process.env.NEXT_PUBLIC_API_BASE || "";
+  return normalizeBackendBase(process.env.API_BASE || process.env.NEXT_PUBLIC_API_BASE);
 }
 
 function buildEndpoint(base: string, path: string) {
@@ -18,9 +44,6 @@ async function parseBody(request: Request) {
 
 export async function GET() {
   const apiBase = getBackendBase();
-  if (!apiBase) {
-    return NextResponse.json({ error: "API_BASE não configurada no servidor Next.js." }, { status: 500 });
-  }
 
   try {
     const response = await fetch(buildEndpoint(apiBase, "/api/candidatos"), {
@@ -42,9 +65,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const apiBase = getBackendBase();
-  if (!apiBase) {
-    return NextResponse.json({ error: "API_BASE não configurada no servidor Next.js." }, { status: 500 });
-  }
 
   const body = await parseBody(request);
   if (!body) {

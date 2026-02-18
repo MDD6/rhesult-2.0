@@ -4,11 +4,14 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { useAuth } from "@/shared/context/AppContext";
+import type { User } from "@/shared/types/domain";
 import { loginRequest } from "../services/authApi";
 
 export function LoginPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setToken, setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +41,11 @@ export function LoginPageClient() {
         if (response.user) {
           localStorage.setItem("rhesult_user", JSON.stringify(response.user));
         }
+      }
+
+      setToken(token);
+      if (response.user) {
+        setUser(response.user as User);
       }
 
       // Aguardar um pouco para o cookie httpOnly ser processado pelo navegador

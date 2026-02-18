@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/context/AppContext';
 import { AppHeader } from '@/shared/components/AppHeader';
 
@@ -12,8 +13,51 @@ interface User {
   avatar_url?: string;
 }
 
+function resolveAvatarUrl(value?: string) {
+  const url = String(value || '').trim();
+  if (!url) return '';
+
+  if (url.startsWith('/uploads/')) {
+    return `/api/public${url}`;
+  }
+
+  return url;
+}
+
+function loadImage(source: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Não foi possível carregar a imagem selecionada.'));
+    image.src = source;
+  });
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Falha ao gerar imagem para upload.'));
+        return;
+      }
+      resolve(blob);
+    }, type, quality);
+  });
+}
+
+async function parseApiError(response: Response, fallback: string) {
+  const payload = await response.json().catch(() => null);
+  if (payload && typeof payload === 'object') {
+    const data = payload as { error?: unknown; mensagem?: unknown };
+    if (typeof data.mensagem === 'string' && data.mensagem.trim()) return data.mensagem;
+    if (typeof data.error === 'string' && data.error.trim()) return data.error;
+  }
+  return fallback;
+}
+
 export function ProfilePageClient() {
-  const { token } = useAuth();
+  const router = useRouter();
+  const { token, logout, isLoading: isAuthLoading, user: authUser, setUser: setAuthUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User>({
     nome: '',
@@ -34,6 +78,11 @@ export function ProfilePageClient() {
   const carregarPerfil = useCallback(async () => {
     try {
       setMessage('');
+
+      if (isAuthLoading) {
+        return;
+      }
+
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
       
       // Add authorization token if available
@@ -44,7 +93,16 @@ export function ProfilePageClient() {
       const response = await fetch('/api/auth/me', {
         method: 'GET',
         headers,
+        credentials: 'include',
       });
+
+      if (response.status === 401) {
+        setMessage('Sua sessao expirou. Faca login novamente.');
+        setMessageType('aviso');
+        logout();
+        router.push('/login?next=/perfil');
+        return;
+      }
 
       if (!response.ok) throw new Error('Erro ao carregar perfil');
 
@@ -56,8 +114,13 @@ export function ProfilePageClient() {
         cargo: userData.cargo || '',
       });
 
+      setAuthUser({
+        ...(authUser || {}),
+        ...userData,
+      } as never);
+
       if (userData.avatar_url) {
-        setAvatar(userData.avatar_url);
+        setAvatar(resolveAvatarUrl(userData.avatar_url));
       }
 
       stampSync();
@@ -66,7 +129,7 @@ export function ProfilePageClient() {
       setMessage('Não foi possível carregar seu perfil.');
       setMessageType('erro');
     }
-  }, [token]);
+  }, [authUser, isAuthLoading, logout, router, setAuthUser, token]);
 
   useEffect(() => {
     carregarPerfil();
@@ -110,9 +173,36 @@ export function ProfilePageClient() {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
+        credentials: 'include',
       });
 
+      if (response.status === 401) {
+        setMessage('Sua sessao expirou. Faca login novamente.');
+        setMessageType('aviso');
+        logout();
+        router.push('/login?next=/perfil');
+        return;
+      }
+
       if (!response.ok) throw new Error('Erro ao salvar perfil');
+
+      const updatedUser = await response.json() as User;
+      setUser((prev) => ({
+        ...prev,
+        id: updatedUser.id || prev.id,
+        nome: updatedUser.nome || prev.nome,
+        email: updatedUser.email || prev.email,
+        cargo: updatedUser.cargo || prev.cargo,
+      }));
+
+      setAuthUser({
+        ...(authUser || {}),
+        ...updatedUser,
+      } as never);
+
+      if (updatedUser.avatar_url) {
+        setAvatar(resolveAvatarUrl(updatedUser.avatar_url));
+      }
 
       setMessage('Perfil atualizado com sucesso!');
       setMessageType('ok');
@@ -149,43 +239,106 @@ export function ProfilePageClient() {
 
     try {
       const canvas = canvasRef.current;
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
+      const image = await loadImage(imageSrc);
+      const targetSize = 320;
 
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const result = reader.result as string;
-          const base64 = result.split(',')[1];
-          if (!base64) return;
+      canvas.width = targetSize;
+      canvas.height = targetSize;
 
-          try {
-            const headers: HeadersInit = { 'Content-Type': 'application/json' };
-            if (token) {
-              headers['Authorization'] = `Bearer ${token}`;
-            }
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Falha ao processar imagem.');
+      }
 
-            const response = await fetch('/api/auth/me', {
-              method: 'PUT',
-              headers,
-              body: JSON.stringify({ avatar_url: `data:image/png;base64,${base64}` }),
-            });
+      const sourceSize = Math.min(image.naturalWidth || image.width, image.naturalHeight || image.height);
+      const sourceX = ((image.naturalWidth || image.width) - sourceSize) / 2;
+      const sourceY = ((image.naturalHeight || image.height) - sourceSize) / 2;
 
-            if (!response.ok) throw new Error('Erro ao salvar avatar');
+      context.clearRect(0, 0, targetSize, targetSize);
+      context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, targetSize, targetSize);
 
-            setAvatar(`data:image/png;base64,${base64}`);
-            setShowCropperModal(false);
-            setImageSrc('');
-            if (fileInputRef.current) fileInputRef.current.value = '';
-          } catch (err) {
-            console.error(err);
-            alert('Erro ao salvar foto');
-          }
+      const blob = await canvasToBlob(canvas, 'image/jpeg', 0.85);
+      const formData = new FormData();
+      formData.append('avatar_file', blob, 'avatar.jpg');
+
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      let updatedUser: User | null = null;
+
+      const multipartResponse = await fetch('/api/auth/me', {
+        method: 'PUT',
+        headers,
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (multipartResponse.status === 401) {
+        setMessage('Sua sessao expirou. Faca login novamente.');
+        setMessageType('aviso');
+        logout();
+        router.push('/login?next=/perfil');
+        return;
+      }
+
+      if (multipartResponse.ok) {
+        updatedUser = (await multipartResponse.json()) as User;
+      } else {
+        const multipartError = await parseApiError(multipartResponse, 'Erro ao salvar avatar por upload.');
+
+        const fallbackHeaders: HeadersInit = {
+          'Content-Type': 'application/json',
         };
-        reader.readAsDataURL(blob);
-      }, 'image/png', 0.95);
+        if (token) {
+          fallbackHeaders['Authorization'] = `Bearer ${token}`;
+        }
+
+        const fallbackAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const fallbackResponse = await fetch('/api/auth/me', {
+          method: 'PUT',
+          headers: fallbackHeaders,
+          body: JSON.stringify({ avatar_url: fallbackAvatarDataUrl }),
+          credentials: 'include',
+        });
+
+        if (fallbackResponse.status === 401) {
+          setMessage('Sua sessao expirou. Faca login novamente.');
+          setMessageType('aviso');
+          logout();
+          router.push('/login?next=/perfil');
+          return;
+        }
+
+        if (!fallbackResponse.ok) {
+          const fallbackError = await parseApiError(fallbackResponse, 'Erro ao salvar avatar.');
+          throw new Error(`${multipartError} ${fallbackError}`.trim());
+        }
+
+        updatedUser = (await fallbackResponse.json()) as User;
+      }
+
+      if (!updatedUser) {
+        throw new Error('Erro ao salvar avatar.');
+      }
+
+      setAuthUser({
+        ...(authUser || {}),
+        ...updatedUser,
+      } as never);
+
+      setAvatar(resolveAvatarUrl(updatedUser.avatar_url) || avatar);
+      setMessage('Foto atualizada com sucesso!');
+      setMessageType('ok');
+      setShowCropperModal(false);
+      setImageSrc('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
       console.error(err);
-      alert('Erro ao processar imagem');
+      const message = err instanceof Error ? err.message : 'Erro ao processar imagem';
+      setMessage(message);
+      setMessageType('erro');
     }
   }
 

@@ -1,58 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RHesult 2.0
 
-## Getting Started
+A RHesult 2.0 é uma plataforma web moderna de recrutamento e seleção que conecta empresas e candidatos por meio de um ecossistema digital inteligente, automatizado e orientado por dados.
 
-First, run the development server:
+## 🎯 Objetivo da aplicação
+
+Desenvolver uma plataforma ATS (Applicant Tracking System) com:
+
+- Publicação dinâmica de vagas
+- Banco de talentos centralizado
+- Candidatura online com upload de currículo
+- Automação de triagem
+- Dashboards analíticos
+- Integrações com APIs externas (WhatsApp, Google, etc.)
+- Interface moderna com UX premium (glassmorphism + Tailwind)
+
+## 🧩 Principais módulos
+
+### 1) Landing institucional
+
+- Apresentação da RHesult
+- Seções de serviços e liderança
+- Prova social com logos em marquee
+- CTAs estratégicos
+- Design responsivo com visual premium
+
+### 2) Módulo de Vagas
+
+Funcionalidades:
+
+- Listagem dinâmica de vagas via API
+- Filtros por cidade, modelo, senioridade e contrato
+- Badge de vaga nova
+- Faixa salarial
+- Modal de candidatura
+- Atualização automática (polling)
+
+Status considerados ativos:
+
+- Ativa
+- Aberta
+- Recebendo Currículos
+- Triagem
+- Entrevista RH
+- Entrevista Gestor
+
+### 3) Candidatura online
+
+Fluxo do candidato:
+
+- Preenchimento de dados pessoais
+- Upload de currículo (`multipart/form-data`)
+- Consentimento LGPD
+- Envio para endpoint `/public/candidatos`
+- Feedback visual de sucesso/erro
+
+Objetivo: reduzir fricção e aumentar conversão de candidatos qualificados.
+
+### 4) Banco de Talentos
+
+- Centralização de candidatos
+- Reuso da base para vagas futuras
+- Estrutura preparada para scoring/classificação por IA
+- Integração futura com People Analytics
+
+### 5) Camada de integração
+
+Plataforma preparada para integração com:
+
+- API própria de vagas
+- WhatsApp automation
+- Google Calendar (entrevistas)
+- Ferramentas ATS
+- OpenAI para triagem inteligente (futuro)
+
+## 🏗️ Arquitetura técnica
+
+### Frontend
+
+- Next.js (App Router)
+- React
+- Tailwind CSS
+- Glassmorphism UI
+- Componentização modular
+- Polling de dados
+- Service Worker (PWA-ready)
+
+### Backend (esperado)
+
+- API REST
+- Endpoint de vagas
+- Endpoint de candidatos (multipart)
+- Estrutura preparada para autenticação futura
+
+## 🎨 Diferenciais de UX/UI
+
+- Visual premium e corporativo
+- Hero com overlay profissional
+- Componentes glass
+- Marquee de clientes
+- Cards interativos de vagas
+- Microinterações suaves
+- Responsividade total
+- Performance otimizada
+
+## 📈 Objetivo estratégico
+
+A RHesult 2.0 não é apenas um site de vagas, mas uma plataforma de inteligência em recrutamento para:
+
+- Reduzir o time-to-hire
+- Aumentar a qualidade das contratações
+- Melhorar a experiência do candidato
+- Dar previsibilidade ao RH
+- Escalar operações de recrutamento
+
+---
+
+## 🚀 Executando o projeto
+
+### 1) Frontend
 
 ```bash
+cd rhesult-web
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2) Configurar backend no frontend
 
-## Backend (login funcional)
-
-Para o login funcionar, configure a URL da API backend no arquivo `.env.local`:
+No arquivo `.env.local` do frontend:
 
 ```env
 API_BASE=http://localhost:4000
+NEXT_PUBLIC_API_BASE=http://localhost:4000
 ```
 
-O frontend envia credenciais para `POST /api/auth/login` (rota interna Next.js), que faz proxy para o backend (`/auth/login`, `/login` ou `/api/login`).
+### 3) Backend
 
-## Banco de dados (schema backend)
+```bash
+cd rhesult-backend
+npm install
+npm start
+```
 
-O schema completo do backend foi adicionado em [database/rhesult_schema.sql](database/rhesult_schema.sql).
+### 4) Banco de dados
 
-Para aplicar no MySQL:
+Schema SQL disponível em [database/rhesult_schema.sql](database/rhesult_schema.sql).
+
+Aplicação (MySQL):
 
 ```bash
 mysql -u seu_usuario -p seu_banco < database/rhesult_schema.sql
 ```
-
-Obs.: o script inclui tabelas, FKs, índices e upgrades idempotentes para `candidatos`.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

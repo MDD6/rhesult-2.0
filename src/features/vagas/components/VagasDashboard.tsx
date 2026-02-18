@@ -30,6 +30,21 @@ export function VagasDashboard({ vagas }: VagasDashboardProps) {
     return d >= trintaDiasAtras;
   }).length;
 
+  const totalEntrevistas = vagas.reduce((acc, vaga) => acc + Number(vaga.total_entrevistas || 0), 0);
+  const totalContratadas = vagas.filter(v => (v.status_processo || v.status) === 'Contratado').length;
+  const taxaEntrevista = totalCandidatos > 0 ? (totalEntrevistas / totalCandidatos) * 100 : 0;
+  const taxaContratacao = totalVagas > 0 ? (totalContratadas / totalVagas) * 100 : 0;
+
+  const quinzeDiasAtras = new Date();
+  quinzeDiasAtras.setDate(agora.getDate() - 15);
+  const emRiscoSla = vagas.filter(v => {
+    const status = v.status_processo || v.status;
+    if (status === 'Encerrada' || status === 'Contratado' || status === 'Reprovado') return false;
+    if (!v.data_abertura) return false;
+    const abertura = new Date(v.data_abertura);
+    return abertura < quinzeDiasAtras;
+  }).length;
+
   // Por status
   const porStatus: Record<string, number> = {};
   vagas.forEach(v => {
@@ -70,6 +85,25 @@ export function VagasDashboard({ vagas }: VagasDashboardProps) {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-[11px] text-gray-500 font-semibold uppercase">Entrevistas totais</p>
+          <p className="mt-2 text-2xl font-bold text-[#0A2725]">{totalEntrevistas}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-[11px] text-gray-500 font-semibold uppercase">Taxa de entrevista</p>
+          <p className="mt-2 text-2xl font-bold text-[#0A2725]">{taxaEntrevista.toFixed(1)}%</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-[11px] text-gray-500 font-semibold uppercase">Taxa de contratação</p>
+          <p className="mt-2 text-2xl font-bold text-[#0A2725]">{taxaContratacao.toFixed(1)}%</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-[11px] text-gray-500 font-semibold uppercase">Vagas em risco SLA</p>
+          <p className="mt-2 text-2xl font-bold text-[#0A2725]">{emRiscoSla}</p>
+        </div>
+      </div>
+
       {/* Resumos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
@@ -102,6 +136,17 @@ export function VagasDashboard({ vagas }: VagasDashboardProps) {
                 </li>
               ))
             )}
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <h2 className="font-semibold text-[#0A2725] mb-2 text-sm">Performance do funil</h2>
+          <ul className="text-sm text-gray-700 space-y-1">
+            <li>Candidatos totais: {totalCandidatos}</li>
+            <li>Entrevistas realizadas: {totalEntrevistas}</li>
+            <li>Contratações: {totalContratadas}</li>
+            <li>Conversão candidato → entrevista: {taxaEntrevista.toFixed(1)}%</li>
+            <li>Conversão vaga → contratação: {taxaContratacao.toFixed(1)}%</li>
           </ul>
         </div>
       </div>

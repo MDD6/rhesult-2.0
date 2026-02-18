@@ -26,6 +26,12 @@ export interface VagaFilters {
   status: string;
   modelo: string;
   tipoContrato: string;
+  senioridade: string;
+  salarioMin: string;
+  salarioMax: string;
+  dataAberturaInicio: string;
+  dataAberturaFim: string;
+  apenasAtivas: string;
 }
 
 export interface VagaPaginationState {

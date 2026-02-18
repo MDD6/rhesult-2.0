@@ -13,9 +13,9 @@ interface VagasFiltersProps {
 export function VagasFilters({ filters, onFilterChange, onApply, onReset }: VagasFiltersProps) {
   return (
     <section className="bg-white rounded-2xl shadow-sm border border-gray-100/80 p-5 mb-8 backdrop-blur-sm">
-      <div className="flex flex-wrap gap-4 items-end">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-end">
         {/* Busca Rápida */}
-        <div className="w-full sm:w-64">
+        <div className="w-full">
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
             Busca Rápida
           </label>
@@ -32,7 +32,7 @@ export function VagasFilters({ filters, onFilterChange, onApply, onReset }: Vaga
         </div>
 
         {/* Cidade */}
-        <div className="w-full sm:w-40">
+        <div className="w-full">
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
             Cidade
           </label>
@@ -46,7 +46,7 @@ export function VagasFilters({ filters, onFilterChange, onApply, onReset }: Vaga
         </div>
 
         {/* Status */}
-        <div className="w-full sm:w-48">
+        <div className="w-full">
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
             Status
           </label>
@@ -57,6 +57,8 @@ export function VagasFilters({ filters, onFilterChange, onApply, onReset }: Vaga
               className="appearance-none w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
             >
               <option value="">Todos os status</option>
+              <option>Ativa</option>
+              <option>Aberta</option>
               <option>Recebendo Currículos</option>
               <option>Triagem</option>
               <option>Entrevista RH</option>
@@ -71,7 +73,7 @@ export function VagasFilters({ filters, onFilterChange, onApply, onReset }: Vaga
         </div>
 
         {/* Modelo */}
-        <div className="w-full sm:w-40">
+        <div className="w-full">
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
             Modelo
           </label>
@@ -91,7 +93,7 @@ export function VagasFilters({ filters, onFilterChange, onApply, onReset }: Vaga
         </div>
 
         {/* Contrato */}
-        <div className="w-full sm:w-40">
+        <div className="w-full">
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
             Contrato
           </label>
@@ -111,8 +113,95 @@ export function VagasFilters({ filters, onFilterChange, onApply, onReset }: Vaga
           </div>
         </div>
 
+        <div className="w-full">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            Senioridade
+          </label>
+          <div className="relative">
+            <select
+              value={filters.senioridade}
+              onChange={(e) => onFilterChange('senioridade', e.target.value)}
+              className="appearance-none w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
+            >
+              <option value="">Todos</option>
+              <option>Júnior</option>
+              <option>Pleno</option>
+              <option>Sênior</option>
+              <option>Especialista</option>
+            </select>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+          </div>
+        </div>
+
+        <div className="w-full">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            Salário mín.
+          </label>
+          <input
+            type="number"
+            placeholder="Ex: 3000"
+            value={filters.salarioMin}
+            onChange={(e) => onFilterChange('salarioMin', e.target.value)}
+            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
+          />
+        </div>
+
+        <div className="w-full">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            Salário máx.
+          </label>
+          <input
+            type="number"
+            placeholder="Ex: 8000"
+            value={filters.salarioMax}
+            onChange={(e) => onFilterChange('salarioMax', e.target.value)}
+            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
+          />
+        </div>
+
+        <div className="w-full">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            Abertura de
+          </label>
+          <input
+            type="date"
+            value={filters.dataAberturaInicio}
+            onChange={(e) => onFilterChange('dataAberturaInicio', e.target.value)}
+            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
+          />
+        </div>
+
+        <div className="w-full">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            Abertura até
+          </label>
+          <input
+            type="date"
+            value={filters.dataAberturaFim}
+            onChange={(e) => onFilterChange('dataAberturaFim', e.target.value)}
+            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
+          />
+        </div>
+
+        <div className="w-full">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            Escopo
+          </label>
+          <div className="relative">
+            <select
+              value={filters.apenasAtivas}
+              onChange={(e) => onFilterChange('apenasAtivas', e.target.value)}
+              className="appearance-none w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F58634]/20 focus:border-[#F58634] transition-all"
+            >
+              <option value="false">Todas as vagas</option>
+              <option value="true">Apenas vagas ativas</option>
+            </select>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+          </div>
+        </div>
+
         {/* Botões */}
-        <div className="ml-auto flex gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0">
+        <div className="col-span-full flex gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0">
           <button
             type="button"
             onClick={onApply}

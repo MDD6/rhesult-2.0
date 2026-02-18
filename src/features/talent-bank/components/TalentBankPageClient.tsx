@@ -115,6 +115,17 @@ function formatPhone(value?: string) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+function resolveCurriculumLink(url?: string) {
+  const value = String(url || "").trim();
+  if (!value) return "";
+
+  if (value.startsWith("/uploads/")) {
+    return `/api/public${value}`;
+  }
+
+  return value;
+}
+
 function badgeClass(etapa?: string) {
   const key = normalize(etapa);
   if (key.includes("contratado")) return "badge-etapa contratado";
@@ -853,7 +864,7 @@ export function TalentBankPageClient() {
                   <p className="text-xs font-black text-slate-500 uppercase">Links</p>
                   <div className="mt-2 grid gap-2">
                     {detalhe.linkedin && <a href={detalhe.linkedin} target="_blank" rel="noreferrer" className="px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs font-black hover:bg-slate-50">LinkedIn</a>}
-                    {detalhe.curriculum_url && <a href={detalhe.curriculum_url} target="_blank" rel="noreferrer" className="px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs font-black hover:bg-slate-50">Currículo</a>}
+                    {detalhe.curriculum_url && <a href={resolveCurriculumLink(detalhe.curriculum_url)} target="_blank" rel="noreferrer" className="px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs font-black hover:bg-slate-50">Currículo</a>}
                   </div>
                 </div>
               </div>
