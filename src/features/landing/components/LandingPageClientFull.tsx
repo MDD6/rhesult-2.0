@@ -522,7 +522,22 @@ export function LandingPageClient() {
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-16 lg:mb-24">
             <div 
               className="relative will-change-transform transition-transform duration-100 ease-out mx-auto w-full max-w-md lg:max-w-none"
-              style={{ transform: `translateY(${(offsetY - 1800) * 0.08}px)` }}
+              style={{ 
+                // Disable parallax on mobile by using a media eqv check or just setting to 0 if width < lg, 
+                // but since we don't have width in JS easily without hook, let's use a class-based approach 
+                // or ensure the transform is only applied on larger screens if possible.
+                // However, inline styles override classes. 
+                // Let's modify the translateY calculation to be 0 for small screens if we can't detect it,
+                // OR better, Apply the style via a class that is only active on lg viewports if we were using tailwind arbitrary values, 
+                // but we use dynamic values.
+                // A common fix: render the style only if window width is large, or reduce the intensity drastically.
+                // For now, let's REDUCE the intensity significantly or clamp it. 
+                // Actually, the best fix for mobile overlapping is to NOT apply this transform on mobile.
+                
+                // Let's use a conditional spread or just make the factor much smaller and ensure layout spacing handles it.
+                // The issue is likely that "offsetY" is large, pushing the image way down.
+                transform: `translateY(${(offsetY - 1800) * 0.04}px)` 
+              }}
             >
               <div className="absolute -inset-4 bg-orange-100 rounded-full blur-3xl opacity-30"></div>
               <img 
@@ -531,7 +546,7 @@ export function LandingPageClient() {
                 className="relative rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl rotate-1 md:rotate-2 hover:rotate-0 transition-transform duration-500 w-full object-cover h-[300px] md:h-auto"
               />
             </div>
-            <RevealOnScroll delay={100} className="relative z-10">
+            <RevealOnScroll delay={100} className="relative z-10 bg-white/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none p-4 rounded-2xl lg:p-0 -mt-10 lg:mt-0 shadow-lg lg:shadow-none border border-white/50 lg:border-none">
               <h2 className="text-xs font-bold uppercase tracking-widest text-orange-600 mb-3">Filosofia</h2>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 mb-6 leading-tight">Liderança Humanizada e Performance Sustentável</h3>
               <div className="space-y-4 text-slate-600 leading-relaxed text-sm md:text-base">
@@ -553,7 +568,7 @@ export function LandingPageClient() {
 
           {/* Desenvolvimento Contínuo */}
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-16 lg:mb-24">
-            <RevealOnScroll className="order-2 lg:order-1">
+            <RevealOnScroll className="order-2 lg:order-1 relative z-10 bg-white/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none p-4 rounded-2xl lg:p-0 -mt-10 lg:mt-0 shadow-lg lg:shadow-none border border-white/50 lg:border-none">
               <h2 className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-3">Estratégia</h2>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 mb-6 leading-tight">Desenvolvimento Contínuo como Estratégia de Negócio</h3>
               <div className="space-y-4 text-slate-600 leading-relaxed text-sm md:text-base">
@@ -570,7 +585,7 @@ export function LandingPageClient() {
             </RevealOnScroll>
             <div 
               className="relative order-1 lg:order-2 will-change-transform transition-transform duration-100 ease-out mx-auto w-full max-w-md lg:max-w-none"
-              style={{ transform: `translateY(${(offsetY - 2300) * 0.08}px)` }}
+              style={{ transform: `translateY(${(offsetY - 2300) * 0.04}px)` }}
             >
               <div className="absolute -inset-4 bg-blue-100 rounded-full blur-3xl opacity-30"></div>
               <img 
