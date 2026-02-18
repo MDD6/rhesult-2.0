@@ -123,7 +123,7 @@ INSERT IGNORE INTO usuarios (nome, email, senha_hash, role) VALUES
 ('Admin Rhesult', 'admin@rhesult.com', 'hash_seguro_aqui', 'ADMIN');
 
 INSERT INTO usuarios (nome, email, senha_hash, role)
-VALUES ('Matheus Dresch', 'matheusddresch@hotmail.com', SHA2('134679', 256), 'RH')
+VALUES ('Matheus Dresch', 'matheusddresch@hotmail.com', SHA2('', 256), 'RH')
 ON DUPLICATE KEY UPDATE
   nome = VALUES(nome),
   senha_hash = VALUES(senha_hash),
