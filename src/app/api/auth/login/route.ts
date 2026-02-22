@@ -1,43 +1,11 @@
 import { NextResponse } from "next/server";
+import { buildEndpoint } from "@/lib/api-proxy";
+import { AUTH_CONFIG } from "@/shared/constants/app";
 
 type LoginBody = {
   email?: string;
   senha?: string;
 };
-
-const DEFAULT_BACKEND_BASE = "http://localhost:4000";
-
-function normalizeBackendBase(rawBase?: string) {
-  const value = (rawBase || "").trim();
-
-  if (!value) {
-    return DEFAULT_BACKEND_BASE;
-  }
-
-  if (value.startsWith("/")) {
-    return DEFAULT_BACKEND_BASE;
-  }
-
-  if (/^https?:\/\//i.test(value)) {
-    return value.replace(/\/$/, "");
-  }
-
-  try {
-    const withProtocol = `http://${value}`;
-    const parsed = new URL(withProtocol);
-    return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/$/, "");
-  } catch {
-    return DEFAULT_BACKEND_BASE;
-  }
-}
-
-function getBackendBase() {
-  return normalizeBackendBase(process.env.API_BASE || process.env.NEXT_PUBLIC_API_BASE);
-}
-
-function buildEndpoint(base: string, path: string) {
-  return `${base.replace(/\/$/, "")}${path}`;
-}
 
 function getTokenFromPayload(data: unknown) {
   if (!data || typeof data !== "object") return "";
@@ -72,20 +40,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "E-mail e senha são obrigatórios." }, { status: 400 });
   }
 
-  const apiBase = getBackendBase();
-
   const endpoints = ["/auth/login", "/api/auth/login", "/login", "/api/login"];
   const errors: string[] = [];
 
   for (const endpoint of endpoints) {
-    const url = buildEndpoint(apiBase, endpoint);
+    const url = buildEndpoint(endpoint);
 
     try {
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         cache: "no-store",
       });
@@ -105,10 +69,10 @@ export async function POST(request: Request) {
 
         if (token) {
           nextResponse.cookies.set({
-            name: "rhesult_token",
+            name: AUTH_CONFIG.COOKIE_NAME,
             value: token,
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7,
+            path: AUTH_CONFIG.COOKIE_PATH,
+            maxAge: AUTH_CONFIG.COOKIE_MAX_AGE,
             sameSite: "lax",
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",

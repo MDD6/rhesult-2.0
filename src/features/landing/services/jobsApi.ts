@@ -1,23 +1,8 @@
 import type { Job, JobApplication } from "../types";
-
-function normalizeClientApiBase(rawBase?: string) {
-  const value = (rawBase || "").trim();
-  if (!value) return "";
-
-  if (value === "/api") return "";
-
-  return value.replace(/\/$/, "");
-}
+import { getClientApiBase } from "@/shared/utils/clientApi";
 
 function getApiBase() {
-  if (typeof window !== "undefined") {
-    const globalAuth = (window as Window & { RhesultAuth?: { apiBase?: () => string } }).RhesultAuth;
-    if (globalAuth?.apiBase) {
-      return normalizeClientApiBase(globalAuth.apiBase());
-    }
-  }
-
-  return normalizeClientApiBase(process.env.NEXT_PUBLIC_API_BASE);
+  return getClientApiBase();
 }
 
 export async function fetchJobsRequest(): Promise<Job[]> {

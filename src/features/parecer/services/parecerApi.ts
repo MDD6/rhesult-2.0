@@ -1,5 +1,7 @@
 export type ParecerStatus = "pendente" | "aprovado" | "reprovado" | "ajustes";
 
+import { parseApiError as parseError } from "@/shared/utils/clientApi";
+
 export type Parecer = {
   id: number;
   candidato_id: number;
@@ -82,15 +84,6 @@ function normalizeVersao(item: Record<string, unknown>): ParecerVersao {
     created_at: String(item.created_at || ""),
     conteudo: item.conteudo ? String(item.conteudo) : undefined,
   };
-}
-
-async function parseError(response: Response, fallback: string) {
-  const payload = await response.json().catch(() => null);
-  if (payload && typeof payload === "object") {
-    const message = (payload as { error?: string; mensagem?: string }).mensagem || (payload as { error?: string }).error;
-    if (message) return message;
-  }
-  return fallback;
 }
 
 export async function fetchPareceres(filters?: { candidatoId?: number; vagaId?: number }): Promise<Parecer[]> {

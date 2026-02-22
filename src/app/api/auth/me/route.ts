@@ -1,33 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-
-const DEFAULT_BACKEND_BASE = "http://localhost:4000";
-
-function normalizeBackendBase(rawBase?: string) {
-  const value = (rawBase || "").trim();
-
-  if (!value) return DEFAULT_BACKEND_BASE;
-  if (value.startsWith("/")) return DEFAULT_BACKEND_BASE;
-
-  const withProtocol = /^https?:\/\//i.test(value) ? value : `http://${value}`;
-
-  try {
-    const parsed = new URL(withProtocol);
-    if (parsed.port === "3000") {
-      return DEFAULT_BACKEND_BASE;
-    }
-    return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/$/, "");
-  } catch {
-    return DEFAULT_BACKEND_BASE;
-  }
-}
-
-function getBackendBase() {
-  return normalizeBackendBase(process.env.API_BASE || process.env.NEXT_PUBLIC_API_BASE);
-}
-
-function buildEndpoint(base: string, path: string) {
-  return `${base.replace(/\/$/, "")}${path}`;
-}
+import { buildEndpoint, extractToken, buildHeaders } from "@/lib/api-proxy";
 
 async function parseResponsePayload(response: Response) {
   const text = await response.text();
@@ -40,29 +12,12 @@ async function parseResponsePayload(response: Response) {
   }
 }
 
-/**
- * GET /api/auth/me
- * Fetch current authenticated user profile from backend
- */
+/** GET /api/auth/me – Fetch current authenticated user profile */
 export async function GET(request: NextRequest) {
-  const apiBase = getBackendBase();
-
   try {
-    // Get token from Authorization header or cookie
-    const authHeader = request.headers.get("Authorization") || "";
-    const tokenFromHeader = authHeader.replace("Bearer ", "").trim();
-    const tokenFromCookie = request.cookies.get("rhesult_token")?.value || "";
-    const token = tokenFromHeader || tokenFromCookie;
-
-    const url = buildEndpoint(apiBase, "/auth/me");
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-
-    // Pass token if available
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+    const token = extractToken(request);
+    const url = buildEndpoint("/auth/me");
+    const headers = buildHeaders({ token, contentType: "application/json" });
 
     const response = await fetch(url, {
       method: "GET",
@@ -74,7 +29,9 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        typeof data === "object" && data ? (data as Record<string, unknown>) : { error: "Failed to fetch user profile" },
+        typeof data === "object" && data
+          ? (data as Record<string, unknown>)
+          : { error: "Failed to fetch user profile" },
         { status: response.status },
       );
     }
@@ -84,22 +41,17 @@ export async function GET(request: NextRequest) {
     console.error("[GET /api/auth/me]", error);
     return NextResponse.json(
       { error: "Failed to fetch user profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-/**
- * PUT /api/auth/me
- * Update current authenticated user profile
- */
+/** PUT /api/auth/me – Update current authenticated user profile */
 export async function PUT(request: NextRequest) {
-  const apiBase = getBackendBase();
-
   try {
     const contentType = request.headers.get("content-type") || "";
     let body: BodyInit;
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
 
     if (contentType.includes("multipart/form-data")) {
       body = await request.formData();
@@ -109,18 +61,10 @@ export async function PUT(request: NextRequest) {
       headers["Content-Type"] = "application/json";
     }
 
-    // Get token from Authorization header or cookie
-    const authHeader = request.headers.get("Authorization") || "";
-    const tokenFromHeader = authHeader.replace("Bearer ", "").trim();
-    const tokenFromCookie = request.cookies.get("rhesult_token")?.value || "";
-    const token = tokenFromHeader || tokenFromCookie;
+    const token = extractToken(request);
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const url = buildEndpoint(apiBase, "/auth/me");
-
-    // Pass token if available
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+    const url = buildEndpoint("/auth/me");
 
     const response = await fetch(url, {
       method: "PUT",
@@ -133,7 +77,9 @@ export async function PUT(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        typeof data === "object" && data ? (data as Record<string, unknown>) : { error: "Failed to update user profile" },
+        typeof data === "object" && data
+          ? (data as Record<string, unknown>)
+          : { error: "Failed to update user profile" },
         { status: response.status },
       );
     }
@@ -143,7 +89,7 @@ export async function PUT(request: NextRequest) {
     console.error("[PUT /api/auth/me]", error);
     return NextResponse.json(
       { error: "Failed to update user profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

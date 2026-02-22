@@ -14,12 +14,45 @@ export type Candidato = {
   historico?: string;
   linkedin?: string;
   curriculum_url?: string;
+  // Score fields
+  score_total?: number;
+  score_tecnico?: number;
+  score_comportamental?: number;
+  score_salarial?: number;
+  score_prioridade?: string; // 'Alta', 'Media', 'Baixa'
 };
 
 export type Vaga = {
   id: string | number;
   titulo: string;
 };
+
+export type ParsedCV = {
+    nome: string;
+    email: string;
+    telefone: string;
+    senioridade: string;
+    cargo_desejado: string;
+    linkedin: string;
+    historico: string;
+    curriculum_url: string; 
+};
+
+export async function parseCVFile(file: File): Promise<ParsedCV> {
+    const formData = new FormData();
+    formData.append('curriculo', file);
+
+    const response = await fetch('/api/candidatos/parse-cv', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Falha ao processar currículo.');
+    }
+
+    return response.json();
+}
 
 export type CreateCandidatoInput = {
   nome: string;
@@ -42,29 +75,7 @@ type FetchCandidatosFilters = {
   vagaId?: string | number;
 };
 
-function getApiBase() {
-  if (typeof window !== "undefined") {
-    const globalAuth = (window as Window & { RhesultAuth?: { apiBase?: () => string } }).RhesultAuth;
-    if (globalAuth?.apiBase) {
-      return globalAuth.apiBase();
-    }
-  }
-
-  return process.env.NEXT_PUBLIC_API_BASE ?? "";
-}
-
-function getToken() {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem("rhesult_token") || "";
-}
-
-function buildHeaders(extra?: HeadersInit): HeadersInit {
-  const token = getToken();
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(extra || {}),
-  };
-}
+import { getClientApiBase as getApiBase, buildAuthHeaders as buildHeaders } from "@/shared/utils/clientApi";
 
 function normalizeCandidate(input: Record<string, unknown>): Candidato {
   return {
@@ -83,6 +94,12 @@ function normalizeCandidate(input: Record<string, unknown>): Candidato {
     historico: String(input.historico ?? "").trim() || undefined,
     linkedin: String(input.linkedin ?? "").trim() || undefined,
     curriculum_url: String(input.curriculum_url ?? "").trim() || undefined,
+    // Map score fields
+    score_total: typeof input.score_total === 'number' ? input.score_total : undefined,
+    score_tecnico: typeof input.score_tecnico === 'number' ? input.score_tecnico : undefined,
+    score_comportamental: typeof input.score_comportamental === 'number' ? input.score_comportamental : undefined,
+    score_salarial: typeof input.score_salarial === 'number' ? input.score_salarial : undefined,
+    score_prioridade: String(input.score_prioridade || '').trim() || undefined,
   };
 }
 

@@ -7,6 +7,7 @@ import { FormEvent, useState } from "react";
 import { useAuth } from "@/shared/context/AppContext";
 import type { User } from "@/shared/types/domain";
 import { loginRequest } from "../services/authApi";
+import { AUTH_CONFIG } from "@/shared/constants/app";
 
 export function LoginPageClient() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export function LoginPageClient() {
 
       // Salvar em localStorage (para compatibilidade)
       if (typeof window !== "undefined") {
-        localStorage.setItem("rhesult_token", token);
+        localStorage.setItem(AUTH_CONFIG.TOKEN_STORAGE_KEY, token);
         if (response.user) {
           localStorage.setItem("rhesult_user", JSON.stringify(response.user));
         }
@@ -51,8 +52,9 @@ export function LoginPageClient() {
       // Aguardar um pouco para o cookie httpOnly ser processado pelo navegador
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Redirecionar para a página solicitada ou vagas
-      const nextPath = searchParams.get("next") || "/vagas";
+      // Redirecionar para a página solicitada ou vagas (protege contra open redirect)
+      const raw = searchParams.get("next") || "/vagas";
+      const nextPath = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/vagas";
       router.push(nextPath);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao realizar login.";

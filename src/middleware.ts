@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AUTH_CONFIG } from "@/shared/constants/app";
 
-const PUBLIC_PATHS = ["/", "/login"];
+const PUBLIC_PATHS = ["/", "/login", "/banco-talentos/aplicacao", "/inscricoes"];
 const PUBLIC_PREFIXES = ["/api/auth/login", "/api/auth/logout", "/api/public"];
 
 function isStaticPath(pathname: string) {
@@ -32,7 +33,7 @@ function isApiPath(pathname: string) {
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const method = request.method;
-  const token = request.cookies.get("rhesult_token")?.value;
+  const token = request.cookies.get(AUTH_CONFIG.COOKIE_NAME)?.value;
 
   if (isStaticPath(pathname) || isPublicPath(pathname) || isPublicApiRequest(pathname, method)) {
     return NextResponse.next();

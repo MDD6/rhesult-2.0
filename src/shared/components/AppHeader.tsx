@@ -35,6 +35,7 @@ const recruitingNav: NavItem[] = [
   { label: "Pareceres", href: "/parecer" },
   { label: "Entrevistados", href: "/entrevistados" },
   { label: "Entrevistas", href: "/agenda" },
+  { label: "Onboarding", href: "/onboarding" },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -70,7 +71,8 @@ export function AppHeader() {
     pathname.startsWith("/banco-talentos") ||
     pathname.startsWith("/parecer") ||
     pathname.startsWith("/entrevistados") ||
-    pathname.startsWith("/agenda");
+    pathname.startsWith("/agenda") ||
+    pathname.startsWith("/onboarding");
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {

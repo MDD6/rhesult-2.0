@@ -1,7 +1,9 @@
 import type { LoginResponse } from "./authApi";
 
-const TOKEN_KEY = "rhesult_token";
-const USER_KEY = "rhesult_user";
+import { AUTH_CONFIG } from "@/shared/constants/app";
+
+const TOKEN_KEY = AUTH_CONFIG.TOKEN_STORAGE_KEY;
+const USER_KEY = AUTH_CONFIG.USER_STORAGE_KEY;
 
 function setTokenCookie(token: string) {
   if (typeof document === "undefined") return;

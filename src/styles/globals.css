@@ -351,31 +351,12 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes scroll{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 .marquee-wrapper:hover .marquee-track{ animation-play-state: paused; }
 
-/* Fluent Background Animation */
-@keyframes fluentGradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
+/* Static background — no continuous animation */
 
 html{ scroll-behavior:smooth; overflow-x:hidden; }
 body{
   overflow-x:hidden;
-  background: linear-gradient(
-    -45deg,
-    #ffffff,
-    #fbfcff,
-    #f0f5ff,
-    #ffffff
-  );
-  background-size: 400% 400%;
-  animation: fluentGradient 15s ease infinite;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 50%, #f0f5ff 100%);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

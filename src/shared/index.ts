@@ -14,8 +14,7 @@ export { BaseAdapter } from "./adapters/BaseAdapter";
 export { APP_CONFIG, API_CONFIG, AUTH_CONFIG, ENDPOINT, PAGINATION_CONFIG, ROLE, STATUS_MAP } from "./constants/app";
 
 // Export utils
-export { HttpClient, httpClient } from "./utils/HttpClient";
-export { Validator, ValidationRules } from "./utils/Validator";
+export { getToken, getClientApiBase, buildAuthHeaders, parseApiError, clientRequest } from "./utils/clientApi";
 
 // Export types
 export type {

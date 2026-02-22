@@ -1,6 +1,8 @@
 export type EntrevistaStatus = "Agendada" | "Confirmada" | "Reagendada" | "Cancelada" | "Realizada";
 export type EntrevistaTipo = "RH" | "Tecnica" | "Gestor";
 
+import { parseApiError as parseError } from "@/shared/utils/clientApi";
+
 export type Entrevista = {
   id: number;
   candidato_id: number;
@@ -48,15 +50,6 @@ function normalizeEntrevista(item: Record<string, unknown>): Entrevista {
     meet_link: item.meet_link ? String(item.meet_link) : null,
     google_event_id: item.google_event_id ? String(item.google_event_id) : null,
   };
-}
-
-async function parseError(response: Response, fallback: string) {
-  const payload = await response.json().catch(() => null);
-  if (payload && typeof payload === "object") {
-    const message = (payload as { error?: string; mensagem?: string }).mensagem || (payload as { error?: string }).error;
-    if (message) return message;
-  }
-  return fallback;
 }
 
 export async function fetchEntrevistas(params?: { start?: string; end?: string }): Promise<Entrevista[]> {

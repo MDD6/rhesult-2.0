@@ -40,6 +40,7 @@ type FormState = {
   tipo: EntrevistaTipo;
   status: EntrevistaStatus;
   observacoes: string;
+  meetLink: string;
 };
 
 const STATUS_COLORS: Record<EntrevistaStatus, string> = {
@@ -60,6 +61,7 @@ const EMPTY_FORM: FormState = {
   tipo: "RH",
   status: "Agendada",
   observacoes: "",
+  meetLink: "",
 };
 
 function formatDateToInput(value: string | Date) {
@@ -235,6 +237,7 @@ export function AgendaPageClient() {
       horaFim: formatTimeToInput(item.data_fim),
       tipo: item.tipo,
       status: item.status,
+      meetLink: item.meet_link || "",
       observacoes: item.observacoes || "",
     });
     setCandidateSuggestions([]);
@@ -263,6 +266,7 @@ export function AgendaPageClient() {
       hora_fim: formState.horaFim,
       tipo: formState.tipo,
       status: formState.status,
+      meet_link: formState.meetLink,
       observacoes: formState.observacoes,
     };
 
@@ -785,6 +789,17 @@ export function AgendaPageClient() {
                     <option>Cancelada</option>
                     <option>Realizada</option>
                   </select>
+              
+              <div>
+                <label className="block text-gray-700 mb-1">Link da Reunião (Google Meet / Equipes)</label>
+                <input 
+                  type="url"
+                  value={formState.meetLink} 
+                  onChange={(event) => setFormState((prev) => ({ ...prev, meetLink: event.target.value }))} 
+                  placeholder="https://meet.google.com/..."
+                  className="w-full rounded-lg bg-white border border-gray-300 px-2 py-1.5"
+                />
+              </div>
                 </div>
               </div>
 

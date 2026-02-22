@@ -294,14 +294,36 @@ export function VagasModals({
                         {candidatosDaVaga.length > 0 && (
                           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                             {candidatosDaVaga.map((cand) => (
-                              <div key={String(cand.id)} className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/60">
-                                <p className="font-semibold text-[#0A2725]">{cand.nome || 'Sem nome'}</p>
-                                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600">
-                                  <span>Etapa: {cand.etapa || 'Inscricao'}</span>
-                                  {cand.email && <span>Email: {cand.email}</span>}
-                                  {cand.telefone && <span>Telefone: {cand.telefone}</span>}
-                                  {cand.senioridade && <span>Senioridade: {cand.senioridade}</span>}
-                                  {cand.cidade && <span>Cidade: {cand.cidade}</span>}
+                              <div key={String(cand.id)} className="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/60 transition-colors hover:bg-slate-100">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <p className="font-semibold text-[#0A2725]">{cand.nome || 'Sem nome'}</p>
+                                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600">
+                                      <span>Etapa: {cand.etapa || 'Inscricao'}</span>
+                                      {cand.senioridade && <span>• Senioridade: {cand.senioridade}</span>}
+                                      {cand.cidade && <span>• {cand.cidade}</span>}
+                                    </div>
+                                  </div>
+                                  {/* Score Badge */}
+                                  {cand.score_total !== undefined && (
+                                    <div className="flex flex-col items-end">
+                                      <span className={`text-xs font-bold px-2 py-0.5 rounded border ${
+                                        cand.score_total >= 80 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                                        cand.score_total >= 50 ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                                        'bg-slate-100 text-slate-600 border-slate-200'
+                                      }`}>
+                                        {cand.score_total}% Match
+                                      </span>
+                                      <span className="text-[9px] text-slate-400 mt-0.5" title="T=Técnico, C=Comportamental, S=Salarial">
+                                        T:{cand.score_tecnico || 0} C:{cand.score_comportamental || 0} S:{cand.score_salarial || 0}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <div className="mt-2 flex flex-wrap gap-2 text-xs border-t border-slate-200/50 pt-2">
+                                  {cand.email && <span className="text-slate-500">📧 {cand.email}</span>}
+                                  {cand.telefone && <span className="text-slate-500">📱 {cand.telefone}</span>}
                                 </div>
                               </div>
                             ))}

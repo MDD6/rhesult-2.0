@@ -5,7 +5,7 @@
  * Follows React Hooks best practices
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AppError, ErrorCode, isAppError } from "@/shared";
 
 export interface UseQueryState<T> {
@@ -40,6 +40,16 @@ export function useQuery<T>(
 
   const { enabled = true, retry = true, onSuccess, onError } = options;
 
+  // Ref to avoid infinite loop when consumer passes inline queryFn
+  const queryFnRef = useRef(queryFn);
+  queryFnRef.current = queryFn;
+
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
   const execute = useCallback(async () => {
     if (!enabled) {
       setIsLoading(false);
@@ -50,9 +60,9 @@ export function useQuery<T>(
     setError(null);
 
     try {
-      const result = await queryFn();
+      const result = await queryFnRef.current();
       setData(result);
-      onSuccess?.(result);
+      onSuccessRef.current?.(result);
     } catch (err) {
       let appError: AppError;
 
@@ -67,7 +77,7 @@ export function useQuery<T>(
       }
 
       setError(appError);
-      onError?.(appError);
+      onErrorRef.current?.(appError);
 
       if (retry) {
         console.warn(`Query failed, will retry:`, appError.message);
@@ -75,7 +85,7 @@ export function useQuery<T>(
     } finally {
       setIsLoading(false);
     }
-  }, [queryFn, enabled, retry, onSuccess, onError]);
+  }, [enabled, retry]);
 
   useEffect(() => {
     execute();

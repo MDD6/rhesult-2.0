@@ -11,8 +11,10 @@ import {
   fetchVagas,
   patchCandidatoEtapa,
   updateCandidato,
+  parseCVFile,
 } from "../services/talentBankApi";
 import { AppHeader } from "@/shared/components/AppHeader";
+import { useSocket } from "@/context/SocketContext";
 
 type ViewMode = "dashboard" | "lista" | "cards";
 type ExportScope = "filtered" | "page" | "selected";
@@ -119,11 +121,14 @@ function resolveCurriculumLink(url?: string) {
   const value = String(url || "").trim();
   if (!value) return "";
 
-  if (value.startsWith("/uploads/")) {
-    return `/api/public${value}`;
+  // /uploads/* is proxied to backend by next.config rewrites
+  // No need to route through /api/public
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
   }
 
-  return value;
+  // Ensure leading slash for relative paths
+  return value.startsWith("/") ? value : `/${value}`;
 }
 
 function badgeClass(etapa?: string) {
@@ -174,6 +179,25 @@ export function TalentBankPageClient() {
 
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [vagas, setVagas] = useState<Vaga[]>([]);
+
+  // Socket.IO Integration
+  const { socket } = useSocket();
+  useEffect(() => {
+    if (!socket) return;
+    
+    socket.on('candidate:created', (newCandidate: Candidato) => {
+        setCandidatos(prev => [newCandidate, ...prev]);
+    });
+
+    socket.on('candidate:updated', (updated: Candidato) => {
+        setCandidatos(prev => prev.map(c => c.id === updated.id ? updated : c));
+    });
+
+    return () => {
+        socket.off('candidate:created');
+        socket.off('candidate:updated');
+    };
+  }, [socket]);
 
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroCidade, setFiltroCidade] = useState("");
@@ -1031,8 +1055,64 @@ export function TalentBankPageClient() {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-40 p-4" onClick={() => setShowCreateModal(false)}>
           <div className="modal-card w-full max-w-3xl p-5" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-black text-(--ink)">Novo candidato</h3>
-            <p className="text-xs text-slate-500 mt-1">Preencha os dados para cadastrar no Banco de Talentos.</p>
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                   <h3 className="text-lg font-black text-(--ink)">Novo candidato</h3>
+                   <p className="text-xs text-slate-500 mt-1">Preencha os dados ou faça upload do CV para preenchimento automático.</p>
+                </div>
+                
+                {/* CV UPLOAD BUTTON */}
+                <div className="relative">
+                    <input 
+                        type="file" 
+                        accept=".pdf" 
+                        id="cv-upload-input"
+                        className="hidden" 
+                        onChange={async (e) => {
+                            const input = e.target;
+                            const file = input.files?.[0];
+                            if(!file) return;
+
+                            try {
+                               // Update button text directly to show loading state (React re-render might be slow/complex here for just a label)
+                           const label = document.getElementById('cv-upload-btn-label');
+                           if(label) label.innerText = '⏳ Lendo PDF...';
+
+                           const parsed = await parseCVFile(file);
+                           
+                           setCreateForm(prev => ({
+                                ...prev,
+                                nome: parsed.nome || prev.nome,
+                                email: parsed.email || prev.email,
+                                telefone: parsed.telefone || prev.telefone,
+                                senioridade: parsed.senioridade || prev.senioridade,
+                                cargo_desejado: parsed.cargo_desejado || prev.cargo_desejado,
+                                linkedin: parsed.linkedin || prev.linkedin,
+                                historico: parsed.historico || prev.historico,
+                                curriculum_url: parsed.curriculum_url || prev.curriculum_url
+                           }));
+                           
+                           alert('✅ CV Lido com sucesso! Dados preenchidos.');
+                        } catch (err) {
+                           console.error(err);
+                           alert('Erro ao ler CV. Tente novamente ou preencha manualmente.');
+                        } finally {
+                           const label = document.getElementById('cv-upload-btn-label');
+                           if(label) label.innerText = '📄 Upload PDF (Auto-Preencher)';
+                           // Reset input so same file can be selected again if needed
+                           input.value = '';
+                        }
+                    }}
+                    />
+                    <label 
+                        id="cv-upload-btn-label"
+                        htmlFor="cv-upload-input" 
+                        className="cursor-pointer px-3 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg text-xs hover:bg-blue-200 transition-colors flex items-center gap-2 select-none"
+                    >
+                        📄 Upload PDF (Auto-Preencher)
+                    </label>
+                </div>
+            </div>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="md:col-span-2">

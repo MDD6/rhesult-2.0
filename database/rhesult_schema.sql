@@ -123,7 +123,7 @@ INSERT IGNORE INTO usuarios (nome, email, senha_hash, role) VALUES
 ('Admin Rhesult', 'admin@rhesult.com', 'hash_seguro_aqui', 'ADMIN');
 
 INSERT INTO usuarios (nome, email, senha_hash, role)
-VALUES ('Matheus Dresch', 'matheusddresch@hotmail.com', SHA2('', 256), 'RH')
+VALUES ('Matheus Dresch', 'matheusddresch@hotmail.com', SHA2('134679', 256), 'RH')
 ON DUPLICATE KEY UPDATE
   nome = VALUES(nome),
   senha_hash = VALUES(senha_hash),
@@ -308,3 +308,138 @@ PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 SET @idx := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND INDEX_NAME='idx_candidatos_consentimento');
 SET @s := IF(@idx=0,'CREATE INDEX idx_candidatos_consentimento ON candidatos (consentimento)','SELECT 1');
 PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- =============================
+-- Extensoes ATS: scoring, agenda integrada e onboarding
+-- =============================
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND COLUMN_NAME='score_total');
+SET @s := IF(@c=0,'ALTER TABLE candidatos ADD COLUMN score_total DECIMAL(5,2) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND COLUMN_NAME='score_tecnico');
+SET @s := IF(@c=0,'ALTER TABLE candidatos ADD COLUMN score_tecnico DECIMAL(5,2) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND COLUMN_NAME='score_comportamental');
+SET @s := IF(@c=0,'ALTER TABLE candidatos ADD COLUMN score_comportamental DECIMAL(5,2) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND COLUMN_NAME='score_salarial');
+SET @s := IF(@c=0,'ALTER TABLE candidatos ADD COLUMN score_salarial DECIMAL(5,2) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND COLUMN_NAME='score_prioridade');
+SET @s := IF(@c=0,'ALTER TABLE candidatos ADD COLUMN score_prioridade VARCHAR(20) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='candidatos' AND COLUMN_NAME='score_detalhes_json');
+SET @s := IF(@c=0,'ALTER TABLE candidatos ADD COLUMN score_detalhes_json JSON NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='entrevistas' AND COLUMN_NAME='confirmacao_token');
+SET @s := IF(@c=0,'ALTER TABLE entrevistas ADD COLUMN confirmacao_token VARCHAR(80) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='entrevistas' AND COLUMN_NAME='confirmacao_status');
+SET @s := IF(@c=0,'ALTER TABLE entrevistas ADD COLUMN confirmacao_status VARCHAR(40) DEFAULT ''Pendente''','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='entrevistas' AND COLUMN_NAME='confirmado_em');
+SET @s := IF(@c=0,'ALTER TABLE entrevistas ADD COLUMN confirmado_em DATETIME NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='entrevistas' AND COLUMN_NAME='provider_integracao');
+SET @s := IF(@c=0,'ALTER TABLE entrevistas ADD COLUMN provider_integracao VARCHAR(40) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='entrevistas' AND COLUMN_NAME='provider_event_id');
+SET @s := IF(@c=0,'ALTER TABLE entrevistas ADD COLUMN provider_event_id VARCHAR(255) NULL','SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+CREATE TABLE IF NOT EXISTS agenda_integracoes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  entrevista_id INT NOT NULL,
+  provider ENUM('google','microsoft') NOT NULL,
+  external_event_id VARCHAR(255) NOT NULL,
+  external_calendar_id VARCHAR(255) NULL,
+  sync_status ENUM('pendente','sincronizado','erro') DEFAULT 'pendente',
+  payload_json JSON NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (entrevista_id) REFERENCES entrevistas(id) ON DELETE CASCADE,
+  INDEX idx_agenda_integracoes_entrevista (entrevista_id),
+  INDEX idx_agenda_integracoes_provider (provider)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS comunicacoes_automacoes_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  candidato_id INT NOT NULL,
+  etapa VARCHAR(100) NOT NULL,
+  template_id INT NOT NULL,
+  outbox_id INT NULL,
+  canal ENUM('email','whatsapp') DEFAULT 'email',
+  status VARCHAR(40) DEFAULT 'gerado',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (candidato_id) REFERENCES candidatos(id) ON DELETE CASCADE,
+  FOREIGN KEY (template_id) REFERENCES comunicacoes_templates(id) ON DELETE CASCADE,
+  FOREIGN KEY (outbox_id) REFERENCES comunicacoes_outbox(id) ON DELETE SET NULL,
+  INDEX idx_auto_log_candidato (candidato_id),
+  INDEX idx_auto_log_etapa (etapa)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS onboarding_processos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  candidato_id INT NOT NULL,
+  vaga_id INT NULL,
+  responsavel_id INT NULL,
+  colaborador_nome VARCHAR(255) NOT NULL,
+  colaborador_email VARCHAR(255) NULL,
+  data_admissao DATE NULL,
+  status ENUM('ativo','concluido','cancelado') DEFAULT 'ativo',
+  progresso_percentual DECIMAL(5,2) DEFAULT 0,
+  dp_integracao_status ENUM('pendente','integrado','erro') DEFAULT 'pendente',
+  assinatura_status ENUM('pendente','parcial','concluida') DEFAULT 'pendente',
+  observacoes TEXT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (candidato_id) REFERENCES candidatos(id) ON DELETE CASCADE,
+  FOREIGN KEY (vaga_id) REFERENCES vagas(id) ON DELETE SET NULL,
+  FOREIGN KEY (responsavel_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+  INDEX idx_onboarding_processo_candidato (candidato_id),
+  INDEX idx_onboarding_processo_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS onboarding_itens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  processo_id INT NOT NULL,
+  categoria VARCHAR(80) NOT NULL,
+  titulo VARCHAR(255) NOT NULL,
+  descricao TEXT NULL,
+  obrigatorio TINYINT(1) DEFAULT 1,
+  status ENUM('pendente','em_andamento','concluido','bloqueado') DEFAULT 'pendente',
+  concluido_em DATETIME NULL,
+  responsavel_nome VARCHAR(255) NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (processo_id) REFERENCES onboarding_processos(id) ON DELETE CASCADE,
+  INDEX idx_onboarding_item_processo (processo_id),
+  INDEX idx_onboarding_item_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS onboarding_documentos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  processo_id INT NOT NULL,
+  nome VARCHAR(255) NOT NULL,
+  tipo VARCHAR(80) NULL,
+  arquivo_url VARCHAR(600) NULL,
+  assinatura_status ENUM('pendente','assinado') DEFAULT 'pendente',
+  assinado_por VARCHAR(255) NULL,
+  assinado_em DATETIME NULL,
+  dp_sync_status ENUM('pendente','sincronizado','erro') DEFAULT 'pendente',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (processo_id) REFERENCES onboarding_processos(id) ON DELETE CASCADE,
+  INDEX idx_onboarding_doc_processo (processo_id),
+  INDEX idx_onboarding_doc_assinatura (assinatura_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
